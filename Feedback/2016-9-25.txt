@@ -1,0 +1,5 @@
+Sounds good, although you may find that you exhaust all potential for improvements sooner than you think. But let's see how it goes. I guess you can always make it networked if you have extra time...
+
+One question, will this be run from the command line or will you have a GUI?
+
+-YN
