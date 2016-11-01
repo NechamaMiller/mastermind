@@ -3,7 +3,6 @@ package tests;
 import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.rules.*;
-
 import mastermind.*;
 import exceptions.*;
 
@@ -12,48 +11,47 @@ public class GuessTests
 	private Color[] sequence = {Color.BLUE,Color.GREEN, Color.YELLOW, Color.RED};
 	private Guess guess = new Guess(1,2,sequence);
 	
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
+	@Before
+	public void setup()
+	{
+		Color[] sequence = {Color.BLUE,Color.GREEN, Color.YELLOW, Color.RED};
+		Guess guess = new Guess(1,2,sequence);
+	}
 	
-	@Test
+	
+	@Test(expected = InvalidDataException.class)
 	public void constructorThrowsExceptionWhenNumRedsPlusNumWhitesMoreThanFour()
 	{
-		exception.expect(InvalidDataException.class);
 	    Guess guess = new Guess(1,4,sequence);
 	}
 	
-	@Test
+	@Test(expected = InvalidDataException.class)
 	public void constructorThrowsExceptionWhenNumRedsLessThanZero()
 	{
-		exception.expect(InvalidDataException.class);
 		Guess guess = new Guess(-1,0,sequence);
 	}
 	
-	@Test
+	@Test(expected = InvalidDataException.class)
 	public void constructorThrowsExceptionWhenNumRedsMoreThanFour()
 	{
-		exception.expect(InvalidDataException.class);
 		Guess guess = new Guess(5,0,sequence);
 	}
 	
-	@Test
+	@Test(expected = InvalidDataException.class)
 	public void constructorThrowsExceptionWhenNumWhitesLessThanZero()
 	{
-		exception.expect(InvalidDataException.class);
 		Guess guess = new Guess(0,-1,sequence);
 	}
 	
-	@Test
+	@Test(expected = InvalidDataException.class)
 	public void constructorThrowsExceptionWhenNumWhitesMoreThanFour()
 	{
-		exception.expect(InvalidDataException.class);
 		Guess guess = new Guess(0,5,sequence);
 	}
 	
-	@Test
+	@Test(expected = InvalidDataException.class)
 	public void constructorThrowsExceptionWhenSequenceNull()
 	{
-		exception.expect(InvalidDataException.class);
 		Guess guess = new Guess(1,2,null);
 	}
 	
