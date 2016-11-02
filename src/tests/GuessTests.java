@@ -8,16 +8,8 @@ import exceptions.*;
 
 public class GuessTests 
 {
-	private Color[] sequence = {Color.BLUE,Color.GREEN, Color.YELLOW, Color.RED};
-	private Guess guess = new Guess(1,2,sequence);
-	
-	@Before
-	public void setup()
-	{
-		Color[] sequence = {Color.BLUE,Color.GREEN, Color.YELLOW, Color.RED};
-		Guess guess = new Guess(1,2,sequence);
-	}
-	
+	private static Color[] sequence = {Color.BLUE,Color.GREEN, Color.YELLOW, Color.RED};
+	private static Guess guess = new Guess(1,2,sequence);
 	
 	@Test(expected = InvalidDataException.class)
 	public void constructorThrowsExceptionWhenNumRedsPlusNumWhitesMoreThanFour()
@@ -50,23 +42,23 @@ public class GuessTests
 	}
 	
 	@Test(expected = InvalidDataException.class)
-	public void constructorThrowsExceptionWhenSequenceNull()
+	public void constructorThrowsExceptionWhenSequenceIsNull()
 	{
 		Guess guess = new Guess(1,2,null);
 	}
 	
 	@Test
-	public void GetSequenceReturnsArrayCorrectly()
+	public void getSequenceReturnsArrayCorrectly()
 	{
-		//I did assertTrue instead of assertEquals because assertEquals is deprecated for comparing arrays
 		assertTrue(sequence[0].equals(guess.getSequence()[0]));
 		assertTrue(sequence[1].equals(guess.getSequence()[1]));
 		assertTrue(sequence[2].equals(guess.getSequence()[2]));
 		assertTrue(sequence[3].equals(guess.getSequence()[3]));
 	}
 	
+	//I can't use assertSame for the next 2 tests because then I won't know 
 	@Test
-	public void ConstructorMakesDeepCopyOfSequenceArray()
+	public void constructorMakesDeepCopyOfSequenceArray()
 	{
 		Color[] sequence = {Color.BLUE,Color.BLUE,Color.BLUE,Color.BLUE};
 		Guess guess = new Guess(1,2,sequence);
@@ -75,10 +67,15 @@ public class GuessTests
 	}
 	
 	@Test
-	public void GetSequenceReturnsDeepCopyOfSequenceArray()
+	public void getSequenceReturnsDeepCopyOfSequenceArray()
 	{
 		Color[] sequence = guess.getSequence();
 		sequence[0] = Color.WHITE;
 		assertFalse(sequence[0].equals(guess.getSequence()[0]));
+	}
+	
+	public static void main(String[] args)
+	{
+		System.out.println(guess);
 	}
 }
