@@ -2,7 +2,6 @@ package tests;
 
 import static org.junit.Assert.*;
 import org.junit.*;
-import org.junit.rules.*;
 import mastermind.*;
 import exceptions.*;
 
@@ -50,13 +49,10 @@ public class GuessTests
 	@Test
 	public void getSequenceReturnsArrayCorrectly()
 	{
-		assertTrue(sequence[0].equals(guess.getSequence()[0]));
-		assertTrue(sequence[1].equals(guess.getSequence()[1]));
-		assertTrue(sequence[2].equals(guess.getSequence()[2]));
-		assertTrue(sequence[3].equals(guess.getSequence()[3]));
+		assertArrayEquals(sequence, guess.getSequence());
 	}
 	
-	//I can't use assertSame for the next 2 tests because then I won't know 
+	//I can't use assertNotSame for the next 2 tests because then I won't know if a deep copy was done in constructor, in returning method, or in both
 	@Test
 	public void constructorMakesDeepCopyOfSequenceArray()
 	{
@@ -74,6 +70,7 @@ public class GuessTests
 		assertFalse(sequence[0].equals(guess.getSequence()[0]));
 	}
 	
+	//This makes sure that the toString() works
 	public static void main(String[] args)
 	{
 		System.out.println(guess);
