@@ -1,5 +1,7 @@
 package mastermind;
 
+import java.util.Arrays;
+
 import exceptions.*;
 
 public class Guess 
@@ -7,42 +9,87 @@ public class Guess
 	private Color[] sequence;
 	private int numReds;
 	private int numWhites;
-
-	public Guess(int numReds, int numWhites, Color[] entry) 
+	
+	private Color[] key;
+	private boolean gameWon;
+	private int[] results;
+	boolean[] found = new boolean[4];
+	
+	public Guess(Color[] key, Color[] attempt)
 	{
-		// validate that they don't total more than 4
-		if ((numWhites + numReds) > 4)
-		{
-			throw new InvalidDataException("NumWhites plus NumReds cannot be greater than 4.");
-		}
-			
-		// validate that neither number is under 0 or over 4
-		if (numReds < 0 || numReds > 4)
-		{
-			throw new InvalidDataException("NumReds must be between 0 and 4.");
-		}
+		results = new int[4];
+		numReds = 0;
+		numWhites = 0;
 		
-		this.numReds = numReds;
-
-		if (numWhites < 0 || numWhites > 4)
+		if (key == null)
 		{
-			throw new InvalidDataException("NumWhites must be between 0 and 4.");
+			throw new InvalidDataException("The key cannot be null.");
 		}
+		this.key = key;
 		
-		this.numWhites = numWhites;
-
-		// validate that entry is not null
-		if (entry == null)
+		if (attempt == null)
 		{
 			throw new InvalidDataException("The sequence cannot be null.");
 		}
-
+		
 		// deep copy
-		sequence = new Color[entry.length];
-		for (int i = 0; i < entry.length; i++)
+		sequence = new Color[attempt.length];
+		for (int i = 0; i < attempt.length; i++)
 		{
-			sequence[i] = entry[i];
+			sequence[i] = attempt[i];
 		}
+	}
+	
+	public void checkForReds()
+	{
+		// check for reds
+		for (int index = 0; index < key.length; index++)
+		{
+			// if right color right place, the row of the turn up to in game and the column up to in loop
+			// gets a 1 to symbolize a red
+			if (sequence[index].equals(key[index]))
+			{
+				results[index] = 1; //signifies a red
+				numReds++;// total red pegs updated
+				found[index] = true;
+			}
+		}
+		
+		if (numReds == 4)
+			gameWon = true;
+	}
+	
+	public void checkForWhites()
+	{
+		// check for whites
+		if (numReds != 4)
+		{
+			//loops once per each position in the key
+			for (int index = 0; index < key.length; index++)
+			{
+				//loops once per each possible position in the attempt
+				for (int x = 0; x < sequence.length; x++)
+				{
+					//as long as not same place (the current peg we're looking at and the
+					//position we're comparing it to- because then would be red), and this peg
+					//in the attempt hasn't been found yet
+					if (x != index && !found[x] && sequence[index].equals(key[x]))
+					{
+						results[index] = 2;
+						numWhites++;
+						found[x] = true;
+					}
+				}
+			}
+			
+		}
+		
+	} // checkGuess
+	
+	
+	public boolean  isAllRed()
+	{
+		return (numReds == 4);
 	}
 
 	// getters
@@ -68,6 +115,11 @@ public class Guess
 	{
 		return numWhites;
 	}
+	
+	public int[] getResults()
+	{
+		return results; //no need for deep copy, I think
+	}
 
 	@Override
 	public String toString() 
@@ -78,9 +130,23 @@ public class Guess
 		{
 			str.append(c + " ");
 		}
-		str.append("\nNumReds: " + numReds);
-		str.append("\nNumWhites: " + numWhites);
+		str.append("\nReds: " + numReds);
+		str.append("\nWhites: " + numWhites);
 		return str.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Guess other = (Guess) obj;
+		if (!Arrays.equals(sequence, other.sequence))
+			return false;
+		return true;
 	}
 
 }

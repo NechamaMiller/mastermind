@@ -2,7 +2,7 @@ package mastermind;
 
 import java.util.Scanner;
 
-public class Main 
+public class Mastermind 
 {
 	public static void main (String[] args)
 	{
@@ -36,14 +36,14 @@ public class Main
 	
 	public static void greeting()
 	{
-		System.out.println("Welcome to mastermind. Here are the rules of the game:\n"
+		System.out.println("Welcome to Mastermind. Here are the rules of the game:\n"
 				+ "Before we start, I will generate a secret code. Your job is to break that code!\n"
 				+ "There are " + Color.values().length + " possible colors to choose from. They are: " + displayColors() + ".\n"
 				+ "My code can be any combination of 4 of these colors - repeats are allowed.\n"
 				+ "You will have ten turns to guess my code.\n"
 				+ "On each turn, you will enter four colors, and I will tell you how many whites you scored on this round, and how many reds.\n"
 				+ "A \"white\" means you got the right color, but in the wrong place and a \"red\" means you got a color in the right place.\n"
-				+ "If you guess my code before time is up, you win!\n"
+				+ "If you guess my code before you run out of turns, you win!\n"
 				+ "Good luck!");
 	}
 	
@@ -67,27 +67,33 @@ public class Main
 		
 		return sb.toString();
 	}
+	
 	public static Color[] getGuess()
 	{
 		Scanner input = new Scanner(System.in);
 		
 		Color[] colors = new Color[4];
 		
+		
+		System.out.println("Enter the next sequence you would like to guess. You can choose any four of the following colors: " + displayColors());			
+		
 		for (int i=0; i<colors.length;i++)
 		{
-			System.out.print("Enter choice number " + (i+1) + " from the following colors: " + displayColors() + ":");			
-			
-			String color = input.nextLine().trim().toUpperCase();
+			String color = input.next().toUpperCase();
 			
 			while (!(isValidColor(color)))
 			{
-				System.out.print("Color number " + (i+1) + " wasn't valid. Please try again:");
-				color = input.nextLine().trim().toUpperCase();
+				//TL added a more descriptive error message that makes it clear to the user that they have to 
+				//re-enter all colors (not only erroneous one) again, because they were overlooked
+				System.out.println("Color number " + (i+1) + " wasn't valid. Please try entering it "
+						+ (i < 3 ? "(and the rest of your sequence) " : "") + "again:");
+				input.nextLine(); //clear keyboard buffer
+				color = input.next().toUpperCase();
 			}
 			
 			colors[i] = Color.valueOf(color);
 		}
-		
+
 		return colors;
 	}
 	
