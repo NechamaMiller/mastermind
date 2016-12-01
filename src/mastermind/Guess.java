@@ -2,6 +2,7 @@ package mastermind;
 
 import java.util.Arrays;
 
+import enums.*;
 import exceptions.*;
 
 public class Guess 
@@ -11,16 +12,11 @@ public class Guess
 	private int numWhites;
 	
 	private Color[] key;
-	private boolean gameWon;
 	private int[] results;
-	boolean[] found = new boolean[4];
+	private boolean[] found;
 	
 	public Guess(Color[] key, Color[] attempt)
 	{
-		results = new int[4];
-		numReds = 0;
-		numWhites = 0;
-		
 		if (key == null)
 		{
 			throw new InvalidDataException("The key cannot be null.");
@@ -31,6 +27,16 @@ public class Guess
 		{
 			throw new InvalidDataException("The sequence cannot be null.");
 		}
+		
+		if (key.length != attempt.length)
+		{
+			throw new InvalidDataException("Key and sequence must be the same length");
+		}
+		
+		results = new int[key.length];
+		found = new boolean[key.length];
+		numReds = 0;
+		numWhites = 0;
 		
 		// deep copy
 		sequence = new Color[attempt.length];
@@ -54,15 +60,12 @@ public class Guess
 				found[index] = true;
 			}
 		}
-		
-		if (numReds == 4)
-			gameWon = true;
 	}
 	
 	public void checkForWhites()
 	{
 		// check for whites
-		if (numReds != 4)
+		if (numReds != key.length)
 		{
 			//loops once per each position in the key
 			for (int index = 0; index < key.length; index++)
@@ -89,7 +92,7 @@ public class Guess
 	
 	public boolean  isAllRed()
 	{
-		return (numReds == 4);
+		return (numReds == key.length);
 	}
 
 	// getters

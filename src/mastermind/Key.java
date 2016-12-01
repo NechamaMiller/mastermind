@@ -2,6 +2,8 @@ package mastermind;
 
 import java.util.Arrays;
 import java.util.Random;
+
+import enums.*;
 import exceptions.*;
 
 public class Key
@@ -13,23 +15,26 @@ public class Key
 	 * array
 	 * @param size The number of elements to be in the array
 	 */
-	public Key(int size)
+	public Key(int size, int numColors)
 	{
 		if (size <= 0)
 			throw new InvalidDataException("Size must be greater than 0");
+		
+		if (numColors <= 0 || numColors > Color.values().length)
+		{
+			throw new InvalidDataException("NumColors must be between 1 and " + Color.values().length);
+		}
 		
 		colorArray = new Color[size];
 		
 		// for loop to populate each of the spaces in the array
 		for (int index = 0; index < colorArray.length; index++)
 		{
-			// create a Random obj to generate a number randomly from 0 to
-			// number of possible Colors
+			// create a Random obj to generate a number randomly from 0 to number of possible Colors
 			Random rand = new Random();
-			int num = rand.nextInt(Color.values().length);
+			int num = rand.nextInt(numColors);
 			Color col = Color.values()[num];
-			colorArray[index] = col;// set each location to the color determined
-									// by the Random
+			colorArray[index] = col;// set each location to the color determined by the Random
 		}
 	}
 	

@@ -1,6 +1,6 @@
 package mastermind;
 
-import java.util.Random;
+import enums.*;
 
 public class Game
 {
@@ -13,15 +13,32 @@ public class Game
 	private int guessTracker;/*this keeps track of what position we are at in the guesses array and what
 								row we are in in the results array*/
 	private boolean gameWon;// becomes true if user wins
-
+	private final static int KEY_SIZE = 4;//size of key array
+	private int numColors;
+	
 	/**Constructor*/
 	public Game()
 	{
-		this.key = new Key(4);// calls method to create a random sequence to guess
-		this.guessTracker = 0;
-		// the following hardcoded as the player can only have 10 guesses and the sequence can only be four long
-		guesses = new Guess[10];
-		results = new int[10][4];
+		this(GuessLevel.MEDIUM, ColorLevel.MEDIUM);
+	}
+	
+	public Game(GuessLevel guessLevel)
+	{
+		this(guessLevel, ColorLevel.MEDIUM);
+	}
+	
+	public Game(ColorLevel colorLevel)
+	{
+		this(GuessLevel.MEDIUM, colorLevel);
+	}
+	
+	public Game (GuessLevel guessLevel, ColorLevel colorLevel)
+	{
+		numColors = colorLevel.getNumColors();
+		key = new Key(KEY_SIZE, numColors);// calls method to create a random sequence to guess
+		guessTracker = 0;
+		guesses = new Guess[guessLevel.getNumGuesses()];
+		results = new int[guessLevel.getNumGuesses()][KEY_SIZE];
 		gameWon = false;
 	}
 	
@@ -34,13 +51,6 @@ public class Game
 			return null;
 		}
 		return this.guesses;
-	}
-
-	/**getNumGuesses: a getter
-	 * @return the number of guesses made so far*/
-	public int getNumGuesses()
-	{
-		return this.guessTracker;
 	}
 
 	public void checkGuess(Color[] attempt)
@@ -79,6 +89,11 @@ public class Game
 	 * Getter for results
 	 * @return Deep copy of results array
 	 */
+	/*
+	 * This method may present a security breach in the interests of providing access for one (as yet undeveloped) 
+	 * class to the results array. This will be reassessed later in the development process.
+	 */
+	//TODO: return to this method and reanalyze
 	public int[][] getResults()
 	{	
 		//TL added this method
@@ -90,5 +105,30 @@ public class Game
 				array[i][j] = results[i][j];
 		}
 		return array;
+	}
+
+	public static int getKeySize()
+	{
+		return KEY_SIZE;
+	}
+	
+	public int getNumColors()
+	{
+		return numColors;
+	}
+	
+	/**getNumGuessesMade: a getter
+	 * @return the number of guesses made so far*/
+	public int getNumGuessesMade()
+	{
+		return this.guessTracker;
+	}
+
+	/**
+	 * @return total number of turns the user has in the game
+	 */
+	public int getTotalNumTurns()
+	{
+		return guesses.length;
 	}
 }// Game class

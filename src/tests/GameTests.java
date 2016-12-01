@@ -2,6 +2,10 @@ package tests;
 
 import static org.junit.Assert.*;
 import org.junit.*;
+
+import enums.Color;
+import enums.ColorLevel;
+import enums.GuessLevel;
 import mastermind.*;
 import exceptions.*;
 
@@ -11,11 +15,11 @@ public class GameTests {
 	 * Therefore, Game does not have so many tests, but its components (Key and Guess) were broken 
 	 * out and tested separately.
 	 */
-	Game game;
+	private Game game;
 	@Before
 	public void setUp()
 	{
-		game = new Game();
+		game = new Game(GuessLevel.MEDIUM, ColorLevel.MEDIUM);
 	}
 	
 	@Test
@@ -66,7 +70,7 @@ public class GameTests {
 		game.checkGuess(new Color[] {Color.BLUE, Color.BLUE, Color.BLUE, Color.BLUE});
 		game.checkGuess(new Color[] {Color.RED, Color.YELLOW, Color.RED, Color.YELLOW});
 		
-		assertEquals(3, game.getNumGuesses());
+		assertEquals(3, game.getNumGuessesMade());
 	}
 	
 	@Test
@@ -83,5 +87,12 @@ public class GameTests {
 		assertArrayEquals(guess1, game.getGuesses()[0].getSequence());
 		assertArrayEquals(guess2, game.getGuesses()[1].getSequence());
 		assertArrayEquals(guess3, game.getGuesses()[2].getSequence());
+	}
+	
+	@Test
+	public void ConstructorSetsGuessAndColorLevelToRightValues()
+	{
+		assertEquals(GuessLevel.MEDIUM.getNumGuesses(), game.getTotalNumTurns());
+		assertEquals(ColorLevel.MEDIUM.getNumColors(), game.getNumColors());
 	}
 }

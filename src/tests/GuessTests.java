@@ -2,77 +2,144 @@ package tests;
 
 import static org.junit.Assert.*;
 import org.junit.*;
+
+import enums.Color;
 import mastermind.*;
 import exceptions.*;
 
-public class GuessTests 
-{
-	private static Color[] sequence = {Color.BLUE,Color.GREEN, Color.YELLOW, Color.RED};
-	private static Guess guess = new Guess(1,2,sequence);
+public class GuessTests {
+	private Color[] keyAllDiff = {Color.GREEN, Color.WHITE, Color.ORANGE, Color.YELLOW};
+	private Color[] keyWithRepeats = {Color.RED, Color.WHITE, Color.BLUE, Color.RED};
 	
-	@Test(expected = InvalidDataException.class)
-	public void constructorThrowsExceptionWhenNumRedsPlusNumWhitesMoreThanFour()
+	@Test
+	public void testCheckGuessAllPegsSameColor()
 	{
-	    Guess guess = new Guess(1,4,sequence);
+		Color[] guessAllSame = {Color.RED, Color.RED, Color.RED, Color.RED};
+		Guess g = new Guess(keyAllDiff, guessAllSame);
+		g.checkForReds();
+		g.checkForWhites();
+		assertEquals(0, g.getNumReds());
+		assertEquals(0, g.getNumWhites());		
 	}
 	
-	@Test(expected = InvalidDataException.class)
-	public void constructorThrowsExceptionWhenNumRedsLessThanZero()
+	@Test
+	public void testCheckGuessAllPegsDiffColor()
 	{
-		Guess guess = new Guess(-1,0,sequence);
+		Color[] guessAllDiff = {Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN};
+		Guess g = new Guess(keyAllDiff, guessAllDiff);
+		g.checkForReds();
+		g.checkForWhites();
+		assertEquals(0, g.getNumReds());
+		assertEquals(2, g.getNumWhites());		
 	}
 	
-	@Test(expected = InvalidDataException.class)
-	public void constructorThrowsExceptionWhenNumRedsMoreThanFour()
+	@Test
+	public void testCheckGuessRepeatingPegColors()
 	{
-		Guess guess = new Guess(5,0,sequence);
+		Color[] guessWithRepeats = {Color.RED, Color.BLUE, Color.RED, Color.BLUE};
+		Guess g = new Guess(keyWithRepeats, guessWithRepeats);
+		g.checkForReds();
+		g.checkForWhites();
+		assertEquals(1, g.getNumReds()); //1st RED is in right place
+		assertEquals(2, g.getNumWhites()); //last 2 RED and BLUE are in wrong places
 	}
 	
-	@Test(expected = InvalidDataException.class)
-	public void constructorThrowsExceptionWhenNumWhitesLessThanZero()
+	@Test
+	public void testCheckGuessReturnsFourRedsGameWon()
 	{
-		Guess guess = new Guess(0,-1,sequence);
+		Color[] guessMatchesKey = {Color.RED, Color.WHITE, Color.BLUE, Color.RED};
+		Guess g = new Guess(keyWithRepeats, guessMatchesKey);
+		g.checkForReds();
+		g.checkForWhites();
+		assertEquals(4, g.getNumReds());
+		assertEquals(0, g.getNumWhites());		
+		assertTrue(g.isAllRed());
 	}
 	
-	@Test(expected = InvalidDataException.class)
-	public void constructorThrowsExceptionWhenNumWhitesMoreThanFour()
+	@Test
+	public void checkResultsAllFourReds()
 	{
-		Guess guess = new Guess(0,5,sequence);
+		Color[] guessMatchesKey = {Color.RED, Color.WHITE, Color.BLUE, Color.RED};
+		Guess g = new Guess(keyWithRepeats, guessMatchesKey);
+		g.checkForReds();
+		g.checkForWhites();
+		assertArrayEquals(new int[] {1,1,1,1}, g.getResults()); //all 4 spots should be red
 	}
 	
-	@Test(expected = InvalidDataException.class)
-	public void constructorThrowsExceptionWhenSequenceIsNull()
+	@Test
+	public void checkResultsAllFourWhites()
 	{
-		Guess guess = new Guess(1,2,null);
+		Color[] guessMatchesKey = {Color.WHITE, Color.GREEN, Color.YELLOW, Color.ORANGE};
+		Guess g = new Guess(keyAllDiff, guessMatchesKey);
+		g.checkForReds();
+		g.checkForWhites();
+		assertArrayEquals(new int[] {2,2,2,2}, g.getResults()); //all 4 spots should be white
+	}
+	
+	@Test
+	public void checkResultsNoRedsOrWhites()
+	{
+		Color[] guessDoesntMatchKey = {Color.BLUE, Color.BLUE, Color.BLUE, Color.BLUE};
+		Guess g = new Guess(keyAllDiff, guessDoesntMatchKey);
+		g.checkForReds();
+		g.checkForWhites();
+		assertArrayEquals(new int[] {0,0,0,0}, g.getResults());
+	}
+	
+	@Test
+	public void checkResultsMixtureOfRedsAndWhites()
+	{
+		Color[] guessMatchesKeyALittle = {Color.BLUE, Color.GREEN, Color.ORANGE, Color.BLUE};
+		Guess g = new Guess(keyAllDiff, guessMatchesKeyALittle);
+		g.checkForReds();
+		g.checkForWhites();
+		assertArrayEquals(new int[] {0,2,1,0}, g.getResults());
+	}
+	
+	@Test
+	public void testGamesCheckGuessMethod()
+	{
+		Game game = new Game();
+		Color[] guessWithRepeats = {Color.RED, Color.BLUE, Color.RED, Color.BLUE};
+		game.checkGuess(guessWithRepeats);
+		//can't really check it because it doesn't return anything
+	}
+	
+	@Test
+	public void testGetSequenceReturnsSequenceIPassedIt()
+	{
+		Color[] sequence = new Color[] {Color.RED, Color.BLUE, Color.RED, Color.BLUE};
+		Guess guess = new Guess(keyWithRepeats, sequence);
+		assertArrayEquals(sequence, guess.getSequence());
+	}
+	
+	@Test (expected = InvalidDataException.class)
+	public void testConstructorThrowsExceptionWhenKeyIsNull()
+	{
+		Color[] attempt = {Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW};
+		Guess guess = new Guess(null, attempt);
+	}
+	
+	@Test (expected = InvalidDataException.class)
+	public void testConstructorThrowsExceptionWhenAttemptIsNull()
+	{
+		Guess guess = new Guess(keyAllDiff, null);
 	}
 	
 	@Test
 	public void getSequenceReturnsArrayCorrectly()
 	{
-		assertArrayEquals(sequence, guess.getSequence());
-	}
-	
-	//I can't use assertNotSame for the next 2 tests because then I won't know if a deep copy was done in constructor, in returning method, or in both
-	@Test
-	public void constructorMakesDeepCopyOfSequenceArray()
-	{
-		Color[] sequence = {Color.BLUE,Color.BLUE,Color.BLUE,Color.BLUE};
-		Guess guess = new Guess(1,2,sequence);
-		sequence[0] = Color.GREEN;
-		assertFalse(guess.getSequence()[0].equals(sequence[0]));
-	}
-	
-	@Test
-	public void getSequenceReturnsDeepCopyOfSequenceArray()
-	{
-		Color[] sequence = guess.getSequence();
-		sequence[0] = Color.WHITE;
-		assertFalse(sequence[0].equals(guess.getSequence()[0]));
+		Color[] attempt = {Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW};
+		Guess guess = new Guess(keyAllDiff, attempt);
+		assertArrayEquals(attempt, guess.getSequence());
 	}
 	
 	//This makes sure that the toString() works
 	public static void main(String[] args)
 	{
+		Color[] attempt = {Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW};
+		Color[] key = new Color[10];
+		Guess guess = new Guess(key, attempt);
 		System.out.println(guess);
 	}
 }
