@@ -1,6 +1,6 @@
 # MCO152-2016F_project
-This program will simulate a game of Mastermind. The physical game Mastermind entails one player creating a sequence of four different colored pegs, and the other player making logical guesses about that sequence based on feedback from Player 1. 
+This program simulates a game of Mastermind. The physical game Mastermind entails one player creating a code sequence of four different colored pegs, and the other player making logical guesses about that sequence based on feedback from Player 1. 
 
-This program will generate a set of 4 numbers between 1 and 6. It will prompt the user to enter their guess, and will give feedback regarding the accuracy of both the numbers chosen and their placement. 
+This program allows the user(s) to choose from single-player or multi-player game play. If they choose single-player, the computer generates a sequence of 4 colors that will serve as the code; if multi-player, the user who chooses the code enters it. The program then prompts the user who is guessing the code to enter their guess, and gives feedback regarding the accuracy of both the numbers chosen and their placement. 
 
-Possible enhancements will include a multi-player option, different difficulty levels (based on the number of possible numbers), and different amounts of permitted guesses.
+There are also different levels of game play: Easy, Medium, Hard, and Expert. The default level is medium, but a user can choose to play the game at any of the levels. They can choose based on the number of colors that are available to be used in the sequence, and the number of guesses they are allowed before they run out.
