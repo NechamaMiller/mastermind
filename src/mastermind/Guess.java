@@ -13,7 +13,8 @@ public class Guess
 	
 	private Color[] key;
 	private int[] results;
-	private boolean[] found;
+	private boolean[] foundInKey;
+	private boolean[] foundInSequence;
 	
 	public Guess(Color[] key, Color[] attempt)
 	{
@@ -34,7 +35,8 @@ public class Guess
 		}
 		
 		results = new int[key.length];
-		found = new boolean[key.length];
+		foundInKey = new boolean[key.length];
+		foundInSequence = new boolean[key.length];
 		numReds = 0;
 		numWhites = 0;
 		
@@ -48,7 +50,6 @@ public class Guess
 	
 	public void checkForReds()
 	{
-		// check for reds
 		for (int index = 0; index < key.length; index++)
 		{
 			// if right color right place, the row of the turn up to in game and the column up to in loop
@@ -57,37 +58,39 @@ public class Guess
 			{
 				results[index] = 1; //signifies a red
 				numReds++;// total red pegs updated
-				found[index] = true;
+				foundInKey[index] = true;
+				foundInSequence[index] = true;
 			}
 		}
 	}
 	
 	public void checkForWhites()
 	{
-		// check for whites
-		if (numReds != key.length)
+		if (!isAllRed())
 		{
 			//loops once per each position in the key
-			for (int index = 0; index < key.length; index++)
+			for (int keyIndex = 0; keyIndex < key.length; keyIndex++)
 			{
 				//loops once per each possible position in the attempt
-				for (int x = 0; x < sequence.length; x++)
+				for (int sequenceIndex = 0; sequenceIndex < sequence.length; sequenceIndex++)
 				{
 					//as long as not same place (the current peg we're looking at and the
 					//position we're comparing it to- because then would be red), and this peg
 					//in the attempt hasn't been found yet
-					if (x != index && !found[x] && sequence[index].equals(key[x]))
+					//if (&& sequence[sequenceIndex].equals(key[keyIndex]))
+					if (sequenceIndex != keyIndex && sequence[sequenceIndex].equals(key[keyIndex]) && !foundInKey[keyIndex] && !foundInSequence[sequenceIndex])
 					{
-						results[index] = 2;
+						results[sequenceIndex] = 2;
 						numWhites++;
-						found[x] = true;
+						foundInKey[keyIndex] = true;
+						foundInSequence[sequenceIndex] = true;
 					}
 				}
 			}
 			
 		}
 		
-	} // checkGuess
+	} 
 	
 	
 	public boolean  isAllRed()

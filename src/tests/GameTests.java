@@ -19,7 +19,7 @@ public class GameTests {
 	@Before
 	public void setUp()
 	{
-		game = new Game(GuessLevel.MEDIUM, ColorLevel.MEDIUM);
+		game = new Game();
 	}
 	
 	@Test

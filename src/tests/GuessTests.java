@@ -96,6 +96,17 @@ public class GuessTests {
 		assertArrayEquals(new int[] {0,2,1,0}, g.getResults());
 	}
 	
+	//NM
+	@Test
+	public void checkResultsMixtureOfRedsAndWhitesWithRepeats()
+	{
+		Color[] guessMatchesKeyALittle = {Color.WHITE, Color.GREEN, Color.RED, Color.RED};
+		Guess g = new Guess(keyWithRepeats, guessMatchesKeyALittle);
+		g.checkForReds();
+		g.checkForWhites();
+		assertArrayEquals(new int[] {2,0,2,1}, g.getResults());		
+	}
+	
 	@Test
 	public void testGamesCheckGuessMethod()
 	{
