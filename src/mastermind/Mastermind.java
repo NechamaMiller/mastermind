@@ -66,6 +66,8 @@ public class Mastermind
 		{
 			System.out.println("Game over! You lose! The code was " + printKey() + ". Better luck next time...");
 		}
+		
+		System.exit(0);//need because of dialog boxes
 	}
 
 	public static void greeting()
