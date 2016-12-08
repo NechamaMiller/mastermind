@@ -10,10 +10,19 @@ public class Mastermind
 	private static Game game;
 	private static Scanner input = new Scanner(System.in);
 	private static ColorLevel colorLevel;
+	private static JFrame frame;
 
 	public static void main(String[] args)
 	{
+		// NM made this to use for enclosing dialog boxes so will always be on top of screent
+		// (used by more than one method, so it's a field)
+		frame = new JFrame();
+		frame.setAlwaysOnTop(true);
+		frame.setVisible(false);// you don't actually want to see the JFrame, it's just to hold the JOptionPanes
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
 		greeting();
+
 		System.out.println();
 
 		GuessLevel guessLevel = getGuessLevel();
@@ -34,8 +43,10 @@ public class Mastermind
 			userKey = enterKey();
 		}
 		else
+		{
 			userKey = null;
-
+		}
+		
 		game = new Game(guessLevel, colorLevel, userKey);
 
 		System.out.println();
@@ -66,6 +77,8 @@ public class Mastermind
 		{
 			System.out.println("Game over! You lose! The code was " + printKey() + ". Better luck next time...");
 		}
+
+		System.exit(0);// need because of dialog boxes
 	}
 
 	public static void greeting()
@@ -75,8 +88,7 @@ public class Mastermind
 				+ "You can also choose to use my default levels.\n"
 				+ "Then, I will generate a secret code. Or, you can have a friend enter the code. Your job is to break that code!\n"
 				+ "The number of colors to choose from will depend on your level, but the total colors are "
-				+ displayColors() + ".\n"// KR
-		// don't have a ColorLevel yet so return values of enum in array and count using .length
+				+ displayColors() + ".\n"// KR don't have a ColorLevel yet so return values of enum in array and count using .length
 				+ "My code can be any combination of " + Game.getKeySize() + " of these colors - repeats are allowed.\n"
 				+ "The number of turns you will have will also depend on your level.\n"
 				+ "On each turn, you will enter " + Game.getKeySize()
@@ -108,34 +120,15 @@ public class Mastermind
 		return sb.toString();
 	}
 
+	// edited by NM
 	public static Color[] getGuess()
 	{
-		Color[] colors = new Color[Game.getKeySize()];
-
-		System.out.println("\nEnter the next sequence you would like to guess." + "\nYou can choose any "
+		System.out.println("\nEnter the next sequence you would like to guess, separated by spaces." + "\nYou can choose any "
 				+ Game.getKeySize() + " of the following colors: " + displayColors());
 
-		for (int i = 0; i < colors.length; i++)
-		{
-			String color = input.next().toUpperCase();
+		String key = input.nextLine().trim();
 
-			while (!(isValidColor(color)))
-			{
-				// TL added a more descriptive error message that makes it clear to the user that they have to
-				// re-enter all colors (not only erroneous one) again, because they were overlooked
-				System.out.println("Color number " + (i + 1) + " wasn't valid. Please try entering it "
-						+ (i < (colors.length - 1) ? "(and the rest of your sequence from that number on) " : "")
-						+ "again:");
-				input.nextLine(); // clear keyboard buffer
-				color = input.next().toUpperCase();
-			}
-
-			colors[i] = Color.valueOf(color);
-		}
-
-		input.nextLine();// clear keyboard buffer in case user mistakenly entered something extra
-
-		return colors;
+		return getColorSequenceFromString(key, false);
 	}
 
 	/**
@@ -241,76 +234,101 @@ public class Mastermind
 	}
 
 	// KR but basically copied the getGuess method
-	// NM made the dialog box
+	// NM made it be able to use dialog box
 	public static Key enterKey()
 	{
-
-		Color[] colors = new Color[Game.getKeySize()];
-
-		// I (NM) enclosed the dialog box in a JFrame so it would always be on top of the screen
-		JFrame frame = new JFrame();
-		frame.setAlwaysOnTop(true);
-		frame.setVisible(false);// you don't actually want to see the JFrame, it's just to hold the JOptionPane
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
 		String key;
+
 		do
 		{
-			key = JOptionPane.showInputDialog(frame, "Enter the secret code for your friend to guess."
-				+ "\nYou can choose any " + Game.getKeySize() + " of the following colors: " + displayColors());
+			key = JOptionPane.showInputDialog(frame, "Enter the secret code for your friend to guess, separated by spaces."
+					+ "\nYou can choose any " + Game.getKeySize() + " of the following colors: " + displayColors());
 		}
-		while (key == null);//if they pressed cancel on the dialog box without entering anything
+		while (key == null);// if they pressed cancel on the dialog box without entering anything
 
-		key = key.trim();
-		
-		for (int i = 0; i < colors.length; i++)
+		return new Key(getColorSequenceFromString(key, true));// creates and returns a new Key instantiated from the second constructor
+	}
+
+	private static Color[] getColorSequenceFromString(String entry, boolean useDialogBox)
+	{
+		Color[] colors = new Color[Game.getKeySize()];
+
+		//get rid of extra spaces so can split on a string
+		entry = getRidOfExtraSpacesInString(entry);
+
+		String[] entryColors = entry.split(" ");
+
+		while (entryColors.length != colors.length)
 		{
-			if (key.isEmpty() && i != (colors.length-1))//if it's the last color being entered, the key should be empty
+			String string = "You did not enter " + colors.length + " colors. Please try again.";
+
+			if (useDialogBox)
 			{
 				do
 				{
-					key = JOptionPane.showInputDialog(frame, "Enter " + (colors.length-i) + " more colors from the following colors: " + displayColors());
+					entry = JOptionPane.showInputDialog(frame, string);
 				}
-				while (key == null);//if they pressed cancel on the dialog box without entering anything
-
-				key = key.trim();
+				while (entry == null);// if they pressed cancel on the dialog box without entering anything
 			}
+			else
+			{
+				System.out.println(string);
+				entry = input.nextLine();
+			}
+			
+			entry = getRidOfExtraSpacesInString(entry);
 
-			String color = null;
+			entryColors = entry.split(" ");
+		}
 
-			int endIndex;
-
-			endIndex = key.indexOf(" ");
-				if (endIndex != -1)
-				{
-					color = key.substring(0, endIndex);
-				}
-				else
-				{
-					color = key;
-				}
-				
-				//get rid of that color from the string and any extra white space 
-				//(i.e. the space between each color and any other spaces they may have entered)
-				key = key.replaceFirst(color, "").trim();
-				
-			color = color.toUpperCase();
+		for (int i = 0; i < colors.length; i++)
+		{
+			String color = entryColors[i].toUpperCase();
 
 			while (!(isValidColor(color)))
 			{
-				color = null;
-				do
+				String string = "Color number " + (i + 1) + " was invalid. Please enter it again:";
+
+				if (useDialogBox)
 				{
-					color = JOptionPane.showInputDialog(frame, "Color number " + (i+1) + " was invalid. Please enter it again:");
+					color = null;
+
+					do
+					{
+						color = JOptionPane.showInputDialog(frame, string);
+
+					}
+					while (color == null);
 				}
-				while (color == null);
-	
+
+				else
+				{
+					System.out.println(string);
+					color = input.nextLine();
+				}
 				color = color.toUpperCase().trim();
 			}
 
 			colors[i] = Color.valueOf(color);
 		}
 
-		return new Key(colors);// creates and returns a new Key instantiated from the second constructor
+		return colors;
+	}
+	
+	/**
+	 * removes leading and trailing whitespace and 2 spaces in a row
+	 * @return
+	 */
+	private static String getRidOfExtraSpacesInString(String entry)
+	{
+		entry = entry.trim();
+
+		// get rid of any 2 spaces in a row, so can split on a space
+		while (entry.contains("  "))
+		{
+			entry = entry.replace("  ", " ");
+		}
+		
+		return entry;
 	}
 }
