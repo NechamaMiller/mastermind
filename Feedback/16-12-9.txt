@@ -1,0 +1,6 @@
+This project is going very well, I'm very impressed. One thing I found jarring was that it runs from the console and then suddenly I get pop up boxes. You don't need to fix this, but something to consider.
+
+I would like it if the user could quit in the middle of a game and not be forced to continue the game.
+
+You don't need to do anything based on this, but I'd like you to think about how easily you could take this program and change it to use a GUI. Is it modularized in such a way that you could simply design the GUI and make use of all of the existing functionality?
+

@@ -14,7 +14,7 @@ public class Mastermind
 
 	public static void main(String[] args)
 	{
-		// NM made this to use for enclosing dialog boxes so will always be on top of screent
+		// NM made this to use for enclosing dialog boxes so will always be on top of screen
 		// (used by more than one method, so it's a field)
 		frame = new JFrame();
 		frame.setAlwaysOnTop(true);
@@ -88,7 +88,7 @@ public class Mastermind
 				+ "You can also choose to use my default levels.\n"
 				+ "Then, I will generate a secret code. Or, you can have a friend enter the code. Your job is to break that code!\n"
 				+ "The number of colors to choose from will depend on your level, but the total colors are "
-				+ displayColors() + ".\n"// KR don't have a ColorLevel yet so return values of enum in array and count using .length
+				+ displayColors() + ".\n"
 				+ "My code can be any combination of " + Game.getKeySize() + " of these colors - repeats are allowed.\n"
 				+ "The number of turns you will have will also depend on your level.\n"
 				+ "On each turn, you will enter " + Game.getKeySize()
