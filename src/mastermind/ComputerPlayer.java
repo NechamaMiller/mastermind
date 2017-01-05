@@ -40,12 +40,12 @@ public class ComputerPlayer
 	{
 		Color[] attempt = new Color[Game.getKeySize()];
 		
-		ComputerGuess lastGuess = guessTracker == 0? null : guesses[guessTracker-1];
+		ComputerGuess lastGuess = guessTracker == 0 ? null : guesses[guessTracker-1];
 		
 		/*
 		 * if we didn't yet guess any of the right color, either because it's the first turn 
 		 * or because so far all our guesses returned 0 reds (and there can't be any whites if all 4 colors are the same)
-		 * then pop another color from the stack to try 
+		 * then take another color from the arraylist to try 
 		 */
 		if(guessTracker == 0 || (lastGuess.getNumReds() == 0 && lastGuess.getNumWhites() == 0))
 		{
@@ -68,6 +68,7 @@ public class ComputerPlayer
 		ComputerGuess guess = new ComputerGuess(attempt);
 		guesses[guessTracker++] = guess;
 		
+		//return attempt;
 		return guess;
 	}
 	
@@ -89,30 +90,11 @@ public class ComputerPlayer
 				
 		else if(lastGuess.getNumReds() + lastGuess.getNumWhites() != Game.getKeySize())
 		{
-//			//get all the colors that we know are for sure in the pattern because they were all one color and had some reds
-//			for(int i=0; i<guessTracker; i++)
-//			{
-//				ComputerGuess guess = guesses[i];
-//				if(guess.isAllOneColor())
-//				{
-//					for(int j=0; j<guess.getNumReds(); j++)
-//					{
-//						attempt[numColorsAdded++] = guess.getSequence()[0];
-//					}
-//				}
-//				else
-//				{
-//					//TODO: look at results and solve
-//					Color[] pastGuessSequence = guesses[i].getSequence();
-//					
-//					
-//				}
-//			}
-	
 			//colors we need to use this turn
-			ArrayList<Color> colorsToUse = new ArrayList<>(colorsForSureInPattern);
+			//copy constructor for ArrayList
+			ArrayList<Color> colorsToStillUse = new ArrayList<>(colorsForSureInPattern);
 			
-			for(int i=0; i<attempt.length; i++)
+			for(int i=0; i<colorsInRightSpots.length; i++)
 			{
 				Color color = colorsInRightSpots[i];
 				
@@ -120,34 +102,62 @@ public class ComputerPlayer
 				{
 					attempt[i] = color;
 					numColorsAdded++;
-					colorsToUse.remove(color);
+					colorsToStillUse.remove(color);
 				}
-			}
+			}		
 			
-			while(!colorsToUse.isEmpty())
+			while(!colorsToStillUse.isEmpty())
 			{
-				Color color = colorsToUse.get(0);
-				colorsToUse.remove(color);
+				Color color = colorsToStillUse.get(0);
+				colorsToStillUse.remove(color);
 				boolean usedColor = false;
 				
-				for(int i=0; i<attempt.length && !usedColor; i++)
+				if (lastGuess.getNumWhites() != 0)
 				{
-					if(attempt[i] == null)
+					for (int i = 0; i < attempt.length && !usedColor; i++)
 					{
-						attempt[i] = color;
-						numColorsAdded++;
-						usedColor = true;
+						if (attempt[i] == null)
+						{
+							boolean colorHereBefore = false;
+							for (int j = 0; j < guessTracker; j++)
+							{
+								if (guesses[j].getNumWhites() >0 && guesses[j].getSequence()[i] == color)
+								{
+									colorHereBefore = true;
+								}
+							}
+
+							if (!colorHereBefore)
+							{
+								attempt[i] = color;
+								numColorsAdded++;
+								usedColor = true;
+							}
+						}
+					} 
+				}
+				else
+				{
+					for(int i=0; i<attempt.length && !usedColor; i++)
+					{
+						if(attempt[i] == null)
+						{
+							attempt[i] = color;
+							numColorsAdded++;
+							usedColor = true;
+						}
 					}
 				}
 			}
 			
-			//if we don't have four yet colors, we should fill the rest of the spaces with one specific color
-			if(numColorsAdded != attempt.length)
+			//if not yet 4 colors
+			Color color = allColors.get(numColorUpTo++);
+			for(int i=0; i<attempt.length; i++)
 			{
-				Color color = allColors.get(numColorUpTo++);
-				while(numColorsAdded != attempt.length)
+				if(attempt[i] == null)
 				{
-					attempt[numColorsAdded++] = color;
+					attempt[i] = color;
+					numColorsAdded++;//TODO  do I need numColorsAdded
 				}
 			}
 		}
@@ -165,18 +175,11 @@ public class ComputerPlayer
 		return attempt;
 	}
 	
-	//TODO
-	private boolean checkIfSequenceIsPossible(Color[] sequence)
-	{
-		return true;
-	}
-
 	public void setLastTurnResults(int numReds, int numWhites)
 	{
 		setNumRedsOfLastTurn(numReds);
 		setNumWhitesOfLastTurn(numWhites);
-		modifyColorsInRightSpots(numReds, numWhites);
-		addToForSureColorsBasedOnLastTurn(numReds, numWhites);
+		addToRightColorsBasedOnLastTurn(numReds, numWhites);
 	}
 	
 	private void setNumRedsOfLastTurn(int numReds)
@@ -198,52 +201,14 @@ public class ComputerPlayer
 		
 		guesses[guessTracker-1].setNumWhites(numWhites);
 	}
-
-	private void addToForSureColorsBasedOnLastTurn(int numReds, int numWhites)
-	{
-		ComputerGuess guess = guesses[guessTracker-1];
-		
-		if(guess.isAllOneColor())
-		{
-			Color color = guess.getSequence()[0];
-			
-			for(int i=0; i<numReds; i++)
-			{
-				colorsForSureInPattern.add(color);
-			}
-		}
-		
-		else//check if there's a color that wasn't yet added to the colors to use for sure
-		{ 
-			int total = numReds + numWhites;
-			for(Color alreadyKnownColor: colorsForSureInPattern)
-			{
-				for(Color guessedColor: guess.getSequence())
-				{
-					if(guessedColor == alreadyKnownColor)
-					{
-						total--;
-					}
-				}
-			}
-			
-			Color color = allColors.get(numColorUpTo-1);
-			
-			for(int i=0; i<total; i++)
-			{
-				colorsForSureInPattern.add(color);
-			}
-		}
-	}
 	
-	private void modifyColorsInRightSpots(int numReds, int numWhites)
+	private void addToRightColorsBasedOnLastTurn(int numReds, int numWhites)
 	{
 		//if numReds = colorsForSureInPattern.size() then every color we guessed in last turn that in the list was in right spot
 		//if only got back whites, also
 		//if get back extra reds then you know that we need to add a color and the color that we guessed in the right spot
 		//how do we know that let's say it was the red in the right spot? because there was only 1 red in the guess and 
-		
-		int total = numReds + numWhites;
+
 		Color[] lastSequence = guesses[guessTracker-1].getSequence();
 		
 		if(numReds == Game.getKeySize())
@@ -267,7 +232,7 @@ public class ComputerPlayer
 					 }
 				 }
 				 
-				 colorsInRightSpots[index] = color;
+				colorsInRightSpots[index] = color;
 			 }
 			 
 			 if(numReds > colorsForSureInPattern.size())
@@ -275,17 +240,7 @@ public class ComputerPlayer
 				 //the most recently added color was also a red
 				 Color color = allColors.get(numColorUpTo-1);
 				 
-				 int index = -1;
-				 
-				 for(int j=0; j<lastSequence.length && index == -1; j++)
-				 {
-					 if(lastSequence[j] == color)
-					 {
-						 index = j;
-					 }
-				 }
-				 
-				 colorsInRightSpots[index] = color;
+				 colorsForSureInPattern.add(color);
 			 }
 		}
 				
@@ -300,6 +255,10 @@ public class ComputerPlayer
 		comp.setLastTurnResults(2,0);
 		System.out.println(comp.generateGuess().toString());
 		comp.setLastTurnResults(2,0);
+		System.out.println(comp.generateGuess().toString());
+		comp.setLastTurnResults(3,0);
+		System.out.println(comp.generateGuess().toString());
+		comp.setLastTurnResults(2,1);
 		System.out.println(comp.generateGuess().toString());
 	}
 }
