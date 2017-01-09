@@ -27,9 +27,9 @@ public class ComputerGuess
 
 	public void setNumReds(int numReds)
 	{
-		if(numReds<0 || numReds>Game.getKeySize())
+		if(numReds<0 || numReds+numWhites>Game.getKeySize())
 		{
-			throw new IllegalArgumentException("numReds must be between 0 and " + Game.getKeySize());
+			throw new IllegalArgumentException("numReds must be greater than 0 and numReds + numwhites can't be more than " + Game.getKeySize());
 		}
 		
 		this.numReds = numReds;
@@ -37,9 +37,9 @@ public class ComputerGuess
 
 	public void setNumWhites(int numWhites)
 	{
-		if(numWhites<0 || numWhites>Game.getKeySize())
+		if(numWhites<0 || numWhites+numReds>Game.getKeySize())
 		{
-			throw new IllegalArgumentException("numWhites must be between 0 and " + Game.getKeySize());
+			throw new IllegalArgumentException("numWhites must be greater than 0 and numReds + numwhites can't be more than " + Game.getKeySize());
 		}
 		
 		this.numWhites = numWhites;

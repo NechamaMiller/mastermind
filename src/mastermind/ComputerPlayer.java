@@ -19,7 +19,7 @@ public class ComputerPlayer
 	//to prevent an infinite loop if the computer couldn't guess the code in this many tries, it should give up
 	private final int MAX_TRIES_PER_TURN = 25;
 	
-	public ComputerPlayer(Game game, ColorLevel colorLevel)
+	public ComputerPlayer(Game game)
 	{
 		guesses = new ComputerGuess[game.getTotalNumTurns()];
 		guessTracker = 0;
@@ -28,7 +28,7 @@ public class ComputerPlayer
 		numColorUpTo = 0;
 		colorsForSureInPattern = new ArrayList<>();
 
-		for (int i = 0; i < colorLevel.getNumColors(); i++)
+		for (int i = 0; i < game.getNumColors(); i++)
 		{
 			allColors.add(Color.values()[i]);
 		}
@@ -389,42 +389,14 @@ public class ComputerPlayer
 			}
 		}
 	}
-
-	public static void main(String[] args)
+	
+	public boolean isGameWon()
 	{
-		Scanner input = new Scanner(System.in);
-
-		ComputerPlayer comp = new ComputerPlayer(new Game(), ColorLevel.MEDIUM);
-
-		int numReds = 0;
-
-		for (int i = 0; i < GuessLevel.MEDIUM.getNumGuesses() && numReds != 4; i++)
-		{
-			Color[] attempt = comp.generateGuess();
-
-			for (Color color : attempt)
-			{
-				System.out.print(color + " ");
-			}
-
-			System.out.println();
-
-			System.out.print("Enter numReds of last guess:");
-			numReds = input.nextInt();
-			System.out.print("Enter numWhites of last guess:");
-			int numWhites = input.nextInt();
-			comp.setLastTurnResults(numReds, numWhites);
-
-			System.out.println();
-		}
-
-		if (numReds == 4)
-		{
-			System.out.println("Yay! I guessed your code!");
-		}
-		else
-		{
-			System.out.println("You win! I couldn't guess your code.");
-		}
+		return guessTracker != 0 && guesses[guessTracker-1].getNumReds() == Game.getKeySize();
+	}
+	
+	public boolean isGameOver()
+	{
+		return guessTracker >= guesses.length || isGameWon();
 	}
 }

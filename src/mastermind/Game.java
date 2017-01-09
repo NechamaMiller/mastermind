@@ -19,7 +19,7 @@ public class Game
 	/**Constructor*/
 	public Game()
 	{
-		this(GuessLevel.MEDIUM, ColorLevel.MEDIUM,null);
+		this(GuessLevel.MEDIUM, ColorLevel.MEDIUM, null);
 	}
 	
 	public Game(GuessLevel guessLevel, Key userKey)
@@ -32,6 +32,11 @@ public class Game
 		this(GuessLevel.MEDIUM, colorLevel, userKey);
 	}
 	
+	public Game(GuessLevel geussLevel, ColorLevel colorLevel)
+	{
+		this(geussLevel, colorLevel, null);
+	}
+	
 	public Game (GuessLevel guessLevel, ColorLevel colorLevel, Key userKey)
 	{
 		numColors = colorLevel.getNumColors();
@@ -39,6 +44,7 @@ public class Game
 		guesses = new Guess[guessLevel.getNumGuesses()];
 		results = new int[guessLevel.getNumGuesses()][KEY_SIZE];
 		gameWon = false;
+		
 		if(userKey==null)
 		{
 			key = new Key(KEY_SIZE, numColors);// calls method to create a random sequence to guess
