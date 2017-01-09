@@ -1,6 +1,8 @@
 package mastermind;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 import java.util.Scanner;
 
 import enums.*;
@@ -27,6 +29,8 @@ public class ComputerPlayer
 		{
 			allColors.add(Color.values()[i]);
 		}
+		
+		Collections.shuffle(allColors);//puts the colors in a random order to make it less predictable
 	}
 	
 	/*
@@ -35,7 +39,7 @@ public class ComputerPlayer
 	 * If there are any reds, then keep the right amount of that color in the code, and use another color for the rest of the code
 	 * Now use guess and check (basically) to figure out the right spots for those colors
 	 */
-	public ComputerGuess generateGuess()
+	public Color[] generateGuess()
 	{
 		Color[] attempt = new Color[Game.getKeySize()];
 		
@@ -65,8 +69,7 @@ public class ComputerPlayer
 		ComputerGuess guess = new ComputerGuess(attempt);
 		guesses[guessTracker++] = guess;
 		
-		//return attempt;
-		return guess;
+		return attempt;
 	}
 	
 	/**
@@ -82,68 +85,18 @@ public class ComputerPlayer
 		{
 			throw new IllegalStateException("Can't figure out sequence with no right colors");
 		}
-				
-		else if(colorsForSureInPattern.size() == 0)
+
+		else if(colorsForSureInPattern.size() != 0)
 		{
 			//colors we need to use this turn
 			//copy constructor for ArrayList
 			ArrayList<Color> colorsToStillUse = new ArrayList<>(colorsForSureInPattern);
 			
-			for(int i=0; i<colorsInRightSpots.length; i++)
-			{
-				Color color = colorsInRightSpots[i];
-				
-				if(color != null)
-				{
-					attempt[i] = color;
-					colorsToStillUse.remove(color);
-				}
-			}		
-			
-			while(!colorsToStillUse.isEmpty())
-			{
-				Color color = colorsToStillUse.get(0);
-				colorsToStillUse.remove(color);
-				boolean usedColor = false;
-				
-				if (lastGuess.getNumWhites() != 0)
-				{
-					//TODO make sure for sure use color
-					for (int i = 0; i < attempt.length && !usedColor; i++)
-					{
-						if (attempt[i] == null)
-						{
-							boolean colorHereBefore = false;
-							for (int j = 0; j < guessTracker && !colorHereBefore; j++)
-							{
-								//should only look at guesses that gave us back whites to decide that a spot is wrong for a color
-								if (guesses[j].getNumWhites() >0 && guesses[j].getSequence()[i] == color)//TODO it's not a guess that had whites, what is it?
-								{
-									colorHereBefore = true;
-								}
-							}
+			attempt = addSpotsKnownForSure(colorsToStillUse);	
+			attempt = addOtherKnownColors(attempt, colorsToStillUse, lastGuess);		
 
-							if (!colorHereBefore)
-							{
-								attempt[i] = color;
-								usedColor = true;
-							}
-						}
-					} 
-				}
-				//TODO if didn't use all colors in colorsForSureInPattern, then use
-				else
-				{
-					for(int i=0; i<attempt.length && !usedColor; i++)
-					{
-						if(attempt[i] == null)
-						{
-							attempt[i] = color;
-							usedColor = true;
-						}
-					}
-				}
-			}
+			//check if makes sense with other guesses' reds and whites
+			attempt = makeAttemptPlausible(attempt);
 			
 			//if not yet 4 colors
 			Color color = allColors.get(numColorUpTo++);
@@ -159,6 +112,205 @@ public class ComputerPlayer
 		return attempt;
 	}
 	
+	private Color[] addSpotsKnownForSure( ArrayList<Color> colorsToStillUse)
+	{		
+		Color[] attempt = new Color[Game.getKeySize()];
+		
+		for(int i=0; i<colorsInRightSpots.length; i++)
+		{
+			Color color = colorsInRightSpots[i];
+			
+			if(color != null)
+			{
+				attempt[i] = color;
+				colorsToStillUse.remove(color);
+			}
+		}	
+		
+		return attempt;
+	}
+
+	private Color[] addOtherKnownColors(Color[] attempt, ArrayList<Color> colorsToStillUse, ComputerGuess lastGuess)
+		{		
+			//int numWhites = lastGuess.getNumWhites();
+			
+			while(!colorsToStillUse.isEmpty())
+			{
+				Color color = colorsToStillUse.get(0);
+				colorsToStillUse.remove(color);
+				boolean usedColor = false;
+				
+				if (lastGuess.getNumWhites() != 0)
+				//if(numWhites > 0)
+				{			
+					for (int i = 0; i < attempt.length && !usedColor; i++)
+					{
+						if (attempt[i] == null)
+						{
+							boolean colorHereBefore = false;
+							for (int j = 0; j < guessTracker && !colorHereBefore; j++)
+							{
+								//should only look at guesses that gave us back whites to decide that a spot is wrong for a color
+								if (guesses[j].getNumWhites() >0 && guesses[j].getSequence()[i] == color)
+								{
+									colorHereBefore = true;
+								}
+							}
+	
+							if (!colorHereBefore)
+							{
+								attempt[i] = color;
+								usedColor = true;
+							}
+						}
+					}
+					//r _ _ _
+					if(!usedColor)
+					{
+						Color[] lastSequence = lastGuess.getSequence();
+						
+						for(int i=0; i<lastSequence.length && !usedColor; i++)
+						{
+							if(attempt[i] == null && lastSequence[i] == color)
+							{
+								attempt[i] = color;
+								usedColor = true;
+							}
+						}
+					}
+				}
+	//			else
+	//			{
+	//				Color[] lastSequence = lastGuess.getSequence();
+	//				
+	//				for(int i=0; i<lastSequence.length && !usedColor; i++)
+	//				{
+	//					if(attempt[i] == null && lastSequence[i] == color)
+	//					{
+	//						attempt[i] = color;
+	//						usedColor = true;
+	//					}
+	//				}
+	//			}
+				
+				/*
+				 * if didn't use color yet because let's say our last guess was RED ORANGE YELLOW YELLOW
+				 * and we get back whites, we might still need to keep yellow in spot 3 or 4, but the other loop
+				 * won't let because yellow had already been in both those spots in a guess that generated whites
+				*/
+				for(int i=0; i<attempt.length && !usedColor; i++)
+				{
+					if(attempt[i] == null)
+					{
+						attempt[i] = color;
+						usedColor = true;
+					}
+				}
+			}
+			
+			return attempt;
+		}
+
+	private Color[] makeAttemptPlausible(Color[] attempt)
+	{
+		boolean plausible = true;
+		
+		do
+		{
+			plausible = true;
+			
+			for (int i = 0; i < guessTracker; i++)
+			{
+				boolean[] foundInSequence = new boolean[attempt.length];
+				boolean[] foundInAttempt = new boolean[attempt.length];
+				
+				ComputerGuess guess = guesses[i];
+				Color[] sequence = guess.getSequence();
+				int numReds = 0;
+
+				//can our attempt work with other guess's numReds?
+				for (int j = 0; j < sequence.length; j++)
+				{
+					if (attempt[j] == sequence[j])
+					{
+						numReds++;
+						foundInSequence[j] = foundInAttempt[j] = true;
+					}
+				}
+
+				if (numReds != guess.getNumReds())
+				{
+					plausible = false;
+				}
+
+				if (plausible)
+				{
+
+					//can our attempt work with other guess's numWhites?
+					int numWhites = 0;
+
+					for (int attemptIndex = 0; attemptIndex < attempt.length; attemptIndex++)
+					{
+						//loops once per each possible position in the attempt
+						for (int sequenceIndex = 0; sequenceIndex < sequence.length; sequenceIndex++)
+						{
+							//as long as not same place (the current peg we're looking at and the
+							//position we're comparing it to- because then would be red), and this peg
+							//in the attempt hasn't been found yet
+							//if (&& sequence[sequenceIndex].equals(key[keyIndex]))
+							if (sequenceIndex != attemptIndex && sequence[sequenceIndex].equals(attempt[attemptIndex])
+									&& !foundInSequence[sequenceIndex] && !foundInAttempt[attemptIndex])
+							{
+								numWhites++;
+								foundInSequence[sequenceIndex] = true;
+								foundInAttempt[attemptIndex] = true;
+							}
+						}
+					}
+
+					if (numWhites != guess.getNumWhites())
+					{
+						plausible = false;
+					}
+				}
+			}
+			if (!plausible)
+			{
+				ArrayList<Color> colorsToUse = new ArrayList<>();
+				for (Color color : attempt)
+				{
+					if (color != null)
+					{
+						colorsToUse.add(color);
+					}
+				}
+
+				attempt = new Color[attempt.length];
+
+				attempt = addSpotsKnownForSure(colorsToUse);
+
+				Random generator = new Random();
+
+				while (!colorsToUse.isEmpty())
+				{
+					Color color = colorsToUse.remove(0);
+
+					int index = generator.nextInt(Game.getKeySize());
+					while (attempt[index] != null)
+					{
+						index = generator.nextInt(Game.getKeySize());
+					}
+
+					attempt[index] = color;
+
+				}			
+			} 
+		}
+		while (!plausible);
+		
+		return attempt;
+	}
+
 	public void setLastTurnResults(int numReds, int numWhites)
 	{
 		setNumRedsOfLastTurn(numReds);
@@ -222,7 +374,6 @@ public class ComputerPlayer
 			 
 			 colorsForSureInPattern.add(color);
 		}
-				
 	}
 
 	public static void main(String[] args)
@@ -231,54 +382,35 @@ public class ComputerPlayer
 	
 		ComputerPlayer comp = new ComputerPlayer(new Game(), ColorLevel.MEDIUM);
 		
-		System.out.println(comp.generateGuess().toString());
-		System.out.print("Enter numReds of last guess:");
-		int numReds = input.nextInt();
-		System.out.print("Enter numWhites of last guess:");
-		int numWhites = input.nextInt();
-		comp.setLastTurnResults(numReds, numWhites);
+		int numReds = 0;
 		
-		System.out.println();
-		System.out.println(comp.generateGuess().toString());
-		System.out.print("Enter numReds of last guess:");
-		numReds = input.nextInt();
-		System.out.print("Enter numWhites of last guess:");
-		numWhites = input.nextInt();
-		comp.setLastTurnResults(numReds, numWhites);
+		for(int i=0; i<GuessLevel.MEDIUM.getNumGuesses() && numReds != 4; i++)
+		{
+			Color[] attempt = comp.generateGuess();
+			
+			for(Color color: attempt)
+			{
+				System.out.print(color + " ");
+			}
+			
+			System.out.println();
+			
+			System.out.print("Enter numReds of last guess:");
+			numReds = input.nextInt();
+			System.out.print("Enter numWhites of last guess:");
+			int numWhites = input.nextInt();
+			comp.setLastTurnResults(numReds, numWhites);
+			
+			System.out.println();		
+		}
 		
-		System.out.println();
-		System.out.println(comp.generateGuess().toString());
-		System.out.print("Enter numReds of last guess:");
-		numReds = input.nextInt();
-		System.out.print("Enter numWhites of last guess:");
-		numWhites = input.nextInt();
-		comp.setLastTurnResults(numReds, numWhites);
-		
-		System.out.println();
-		System.out.println(comp.generateGuess().toString());
-		System.out.print("Enter numReds of last guess:");
-		numReds = input.nextInt();
-		System.out.print("Enter numWhites of last guess:");
-		numWhites = input.nextInt();
-		comp.setLastTurnResults(numReds, numWhites);
-		
-		System.out.println();
-		System.out.println(comp.generateGuess().toString());
-		System.out.print("Enter numReds of last guess:");
-		numReds = input.nextInt();
-		System.out.print("Enter numWhites of last guess:");
-		numWhites = input.nextInt();
-		comp.setLastTurnResults(numReds, numWhites);
-		
-		System.out.println();
-		System.out.println(comp.generateGuess().toString());
-		System.out.print("Enter numReds of last guess:");
-		numReds = input.nextInt();
-		System.out.print("Enter numWhites of last guess:");
-		numWhites = input.nextInt();
-		comp.setLastTurnResults(numReds, numWhites);
-		
-		System.out.println();
-		System.out.println(comp.generateGuess().toString());
+		if(numReds == 4)
+		{
+			System.out.println("Yay! I guessed your code!");
+		}
+		else
+		{
+			System.out.println("You win! I couldn't guess you code");
+		}
 	}
 }
