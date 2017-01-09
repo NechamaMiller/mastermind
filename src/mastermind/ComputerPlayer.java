@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 import enums.*;
+import exceptions.*;
 
 public class ComputerPlayer
 {
@@ -15,7 +16,9 @@ public class ComputerPlayer
 	private ArrayList<Color> colorsForSureInPattern;
 	private Color[] colorsInRightSpots;
 	private int numColorUpTo;
-
+	//to prevent an infinite loop if the computer couldn't guess the code in this many tries, it should give up
+	private final int MAX_TRIES_PER_TURN = 25;
+	
 	public ComputerPlayer(Game game, ColorLevel colorLevel)
 	{
 		guesses = new ComputerGuess[game.getTotalNumTurns()];
@@ -63,7 +66,7 @@ public class ComputerPlayer
 
 		else
 		{
-			attempt = getSequenceToTry();
+			attempt = getSequenceToTry(lastGuess);
 		}
 
 		ComputerGuess guess = new ComputerGuess(attempt);
@@ -75,10 +78,9 @@ public class ComputerPlayer
 	/**
 	 * This method should only be called when we know at least one right color
 	 */
-	private Color[] getSequenceToTry()
+	private Color[] getSequenceToTry(ComputerGuess lastGuess)
 	{
-		Color[] attempt = new Color[Game.getKeySize()];
-		ComputerGuess lastGuess = guessTracker == 0 ? null : guesses[guessTracker - 1];
+		Color[] attempt = null;
 
 		// we didn't figure out any colors so far
 		if (lastGuess == null || lastGuess.getNumReds() + lastGuess.getNumWhites() == 0)
@@ -90,32 +92,34 @@ public class ComputerPlayer
 		{
 			// colors we need to use this turn
 			// copy constructor for ArrayList
-			ArrayList<Color> colorsToStillUse = new ArrayList<>(colorsForSureInPattern);
+			//ArrayList<Color> colorsToStillUse = new ArrayList<>(colorsForSureInPattern);
 
-			attempt = addSpotsKnownForSure(colorsToStillUse);
-			attempt = addOtherKnownColors(attempt, colorsToStillUse, lastGuess);
-
+			//attempt = addSpotsKnownForSure(colorsToStillUse);
+			//attempt = addOtherKnownColors(attempt, colorsToStillUse, lastGuess);
+			int numTries = 0;
+			
 			// check if makes sense with other guesses' reds and whites
-			while (!isAttemptPlausible(attempt))
+			Random generator = new Random(System.currentTimeMillis());
+			
+			do
 			{
-				ArrayList<Color> colorsToUse = new ArrayList<>();
-				for (Color color : attempt)
+				numTries++;
+				ArrayList<Color> colorsToStillUse = new ArrayList<>(colorsForSureInPattern);
+//				for (Color color : attempt)
+//				{
+//					if (color != null)
+//					{
+//						colorsToStillUse.add(color);
+//					}
+//				}
+//
+//				attempt = new Color[attempt.length];
+
+				attempt = addSpotsKnownForSure(colorsToStillUse);
+
+				while (!colorsToStillUse.isEmpty())
 				{
-					if (color != null)
-					{
-						colorsToUse.add(color);
-					}
-				}
-
-				attempt = new Color[attempt.length];
-
-				attempt = addSpotsKnownForSure(colorsToUse);
-
-				Random generator = new Random();
-
-				while (!colorsToUse.isEmpty())
-				{
-					Color color = colorsToUse.remove(0);
+					Color color = colorsToStillUse.remove(0);
 
 					int index = generator.nextInt(Game.getKeySize());
 					while (attempt[index] != null)
@@ -124,17 +128,30 @@ public class ComputerPlayer
 					}
 
 					attempt[index] = color;
-
 				}
 			}
+			while (!isAttemptPlausible(attempt) && numTries <= MAX_TRIES_PER_TURN);
 
-			// if not yet 4 colors
-			Color color = allColors.get(numColorUpTo++);
-			for (int i = 0; i < attempt.length; i++)
+			if(numTries > MAX_TRIES_PER_TURN)
 			{
-				if (attempt[i] == null)
+				throw new ComputerLostGameException("Computer couldn't guess the code");
+			}
+			
+			//then we will need to add another color
+			if(colorsForSureInPattern.size() < attempt.length)
+			{
+				if(numColorUpTo == allColors.size())
 				{
-					attempt[i] = color;
+					throw new ComputerLostGameException("Computer couldn't guess the code.");
+				}
+				
+				Color color = allColors.get(numColorUpTo++);
+				for (int i = 0; i < attempt.length; i++)
+				{
+					if (attempt[i] == null)
+					{
+						attempt[i] = color;
+					}
 				}
 			}
 		}
@@ -160,55 +177,55 @@ public class ComputerPlayer
 		return attempt;
 	}
 
-	private Color[] addOtherKnownColors(Color[] attempt, ArrayList<Color> colorsToStillUse, ComputerGuess lastGuess)
-	{
-		// int numWhites = lastGuess.getNumWhites();
-
-		while (!colorsToStillUse.isEmpty())
-		{
-			Color color = colorsToStillUse.get(0);
-			colorsToStillUse.remove(color);
-			boolean usedColor = false;
-
-			if (lastGuess.getNumWhites() != 0)
-			// if(numWhites > 0)
-			{
-				for (int i = 0; i < attempt.length && !usedColor; i++)
-				{
-					if (attempt[i] == null)
-					{
-						boolean colorHereBefore = false;
-						for (int j = 0; j < guessTracker && !colorHereBefore; j++)
-						{
-							// should only look at guesses that gave us back whites to decide that a spot is wrong for a color
-							if (guesses[j].getNumWhites() > 0 && guesses[j].getSequence()[i] == color)
-							{
-								colorHereBefore = true;
-							}
-						}
-
-						if (!colorHereBefore)
-						{
-							attempt[i] = color;
-							usedColor = true;
-						}
-					}
-				}
-				// r _ _ _
-				if (!usedColor)
-				{
-					Color[] lastSequence = lastGuess.getSequence();
-
-					for (int i = 0; i < lastSequence.length && !usedColor; i++)
-					{
-						if (attempt[i] == null && lastSequence[i] == color)
-						{
-							attempt[i] = color;
-							usedColor = true;
-						}
-					}
-				}
-			}
+//	private Color[] addOtherKnownColors(Color[] attempt, ArrayList<Color> colorsToStillUse, ComputerGuess lastGuess)
+//	{
+//		// int numWhites = lastGuess.getNumWhites();
+//
+//		while (!colorsToStillUse.isEmpty())
+//		{
+//			Color color = colorsToStillUse.get(0);
+//			colorsToStillUse.remove(color);
+//			boolean usedColor = false;
+//
+//			if (lastGuess.getNumWhites() != 0)
+//			// if(numWhites > 0)
+//			{
+//				for (int i = 0; i < attempt.length && !usedColor; i++)
+//				{
+//					if (attempt[i] == null)
+//					{
+//						boolean colorHereBefore = false;
+//						for (int j = 0; j < guessTracker && !colorHereBefore; j++)
+//						{
+//							// should only look at guesses that gave us back whites to decide that a spot is wrong for a color
+//							if (guesses[j].getNumWhites() > 0 && guesses[j].getSequence()[i] == color)
+//							{
+//								colorHereBefore = true;
+//							}
+//						}
+//
+//						if (!colorHereBefore)
+//						{
+//							attempt[i] = color;
+//							usedColor = true;
+//						}
+//					}
+//				}
+//				// r _ _ _
+//				if (!usedColor)
+//				{
+//					Color[] lastSequence = lastGuess.getSequence();
+//
+//					for (int i = 0; i < lastSequence.length && !usedColor; i++)
+//					{
+//						if (attempt[i] == null && lastSequence[i] == color)
+//						{
+//							attempt[i] = color;
+//							usedColor = true;
+//						}
+//					}
+//				}
+//			}
 			// else
 			// {
 			// Color[] lastSequence = lastGuess.getSequence();
@@ -228,23 +245,28 @@ public class ComputerPlayer
 			 * and we get back whites, we might still need to keep yellow in spot 3 or 4, but the other loop
 			 * won't let because yellow had already been in both those spots in a guess that generated whites
 			*/
-			for (int i = 0; i < attempt.length && !usedColor; i++)
-			{
-				if (attempt[i] == null)
-				{
-					attempt[i] = color;
-					usedColor = true;
-				}
-			}
-		}
+//			for (int i = 0; i < attempt.length && !usedColor; i++)
+//			{
+//				if (attempt[i] == null)
+//				{
+//					attempt[i] = color;
+//					usedColor = true;
+//				}
+//			}
+//		}
+//
+//		return attempt;
+//	}
 
-		return attempt;
-	}
-
+	/**
+	 * checks this attempt against all other previous attempts to make sure it is plausible
+	 * @param attempt attempt to check
+	 * @return true if attempt is plausible, false otherwise
+	 */
 	private boolean isAttemptPlausible(Color[] attempt)
 	{
 		boolean plausible = true;
-		for (int i = 0; i < guessTracker; i++)
+		for (int i = 0; i < guessTracker && plausible; i++)
 		{
 			boolean[] foundInSequence = new boolean[attempt.length];
 			boolean[] foundInAttempt = new boolean[attempt.length];
@@ -360,9 +382,11 @@ public class ComputerPlayer
 		if (numReds + numWhites > colorsForSureInPattern.size())
 		{
 			// the most recently added color is also in the pattern
-			Color color = allColors.get(numColorUpTo - 1);
-
-			colorsForSureInPattern.add(color);
+			for(int i=colorsForSureInPattern.size(); i<numReds + numWhites; i++)
+			{
+				Color color = allColors.get(numColorUpTo - 1);
+				colorsForSureInPattern.add(color);
+			}
 		}
 	}
 
@@ -400,7 +424,7 @@ public class ComputerPlayer
 		}
 		else
 		{
-			System.out.println("You win! I couldn't guess you code");
+			System.out.println("You win! I couldn't guess your code.");
 		}
 	}
 }
