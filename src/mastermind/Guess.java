@@ -12,7 +12,6 @@ public class Guess
 	private int numWhites;
 	
 	private Color[] key;
-	private int[] results;
 	private boolean[] foundInKey;
 	private boolean[] foundInSequence;
 	
@@ -34,7 +33,6 @@ public class Guess
 			throw new InvalidDataException("Key and sequence must be the same length");
 		}
 		
-		results = new int[key.length];
 		foundInKey = new boolean[key.length];
 		foundInSequence = new boolean[key.length];
 		numReds = 0;
@@ -56,7 +54,6 @@ public class Guess
 			// gets a 1 to symbolize a red
 			if (sequence[index].equals(key[index]))
 			{
-				results[index] = 1; //signifies a red
 				numReds++;// total red pegs updated
 				foundInKey[index] = true;
 				foundInSequence[index] = true;
@@ -80,7 +77,6 @@ public class Guess
 					//if (&& sequence[sequenceIndex].equals(key[keyIndex]))
 					if (sequenceIndex != keyIndex && sequence[sequenceIndex].equals(key[keyIndex]) && !foundInKey[keyIndex] && !foundInSequence[sequenceIndex])
 					{
-						results[sequenceIndex] = 2;
 						numWhites++;
 						foundInKey[keyIndex] = true;
 						foundInSequence[sequenceIndex] = true;
@@ -120,11 +116,6 @@ public class Guess
 	public int getNumWhites() 
 	{
 		return numWhites;
-	}
-	
-	public int[] getResults()
-	{
-		return results; //no need for deep copy, I think
 	}
 
 	@Override

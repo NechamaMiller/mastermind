@@ -56,56 +56,56 @@ public class GuessTests {
 		assertTrue(g.isAllRed());
 	}
 	
-	@Test
-	public void checkResultsAllFourReds()
-	{
-		Color[] guessMatchesKey = {Color.RED, Color.WHITE, Color.BLUE, Color.RED};
-		Guess g = new Guess(keyWithRepeats, guessMatchesKey);
-		g.checkForReds();
-		g.checkForWhites();
-		assertArrayEquals(new int[] {1,1,1,1}, g.getResults()); //all 4 spots should be red
-	}
-	
-	@Test
-	public void checkResultsAllFourWhites()
-	{
-		Color[] guessMatchesKey = {Color.WHITE, Color.GREEN, Color.YELLOW, Color.ORANGE};
-		Guess g = new Guess(keyAllDiff, guessMatchesKey);
-		g.checkForReds();
-		g.checkForWhites();
-		assertArrayEquals(new int[] {2,2,2,2}, g.getResults()); //all 4 spots should be white
-	}
-	
-	@Test
-	public void checkResultsNoRedsOrWhites()
-	{
-		Color[] guessDoesntMatchKey = {Color.BLUE, Color.BLUE, Color.BLUE, Color.BLUE};
-		Guess g = new Guess(keyAllDiff, guessDoesntMatchKey);
-		g.checkForReds();
-		g.checkForWhites();
-		assertArrayEquals(new int[] {0,0,0,0}, g.getResults());
-	}
-	
-	@Test
-	public void checkResultsMixtureOfRedsAndWhites()
-	{
-		Color[] guessMatchesKeyALittle = {Color.BLUE, Color.GREEN, Color.ORANGE, Color.BLUE};
-		Guess g = new Guess(keyAllDiff, guessMatchesKeyALittle);
-		g.checkForReds();
-		g.checkForWhites();
-		assertArrayEquals(new int[] {0,2,1,0}, g.getResults());
-	}
-	
-	//NM
-	@Test
-	public void checkResultsMixtureOfRedsAndWhitesWithRepeats()
-	{
-		Color[] guessMatchesKeyALittle = {Color.WHITE, Color.GREEN, Color.RED, Color.RED};
-		Guess g = new Guess(keyWithRepeats, guessMatchesKeyALittle);
-		g.checkForReds();
-		g.checkForWhites();
-		assertArrayEquals(new int[] {2,0,2,1}, g.getResults());		
-	}
+//	@Test
+//	public void checkResultsAllFourReds()
+//	{
+//		Color[] guessMatchesKey = {Color.RED, Color.WHITE, Color.BLUE, Color.RED};
+//		Guess g = new Guess(keyWithRepeats, guessMatchesKey);
+//		g.checkForReds();
+//		g.checkForWhites();
+//		assertArrayEquals(new int[] {1,1,1,1}, g.getResults()); //all 4 spots should be red
+//	}
+//	
+//	@Test
+//	public void checkResultsAllFourWhites()
+//	{
+//		Color[] guessMatchesKey = {Color.WHITE, Color.GREEN, Color.YELLOW, Color.ORANGE};
+//		Guess g = new Guess(keyAllDiff, guessMatchesKey);
+//		g.checkForReds();
+//		g.checkForWhites();
+//		assertArrayEquals(new int[] {2,2,2,2}, g.getResults()); //all 4 spots should be white
+//	}
+//	
+//	@Test
+//	public void checkResultsNoRedsOrWhites()
+//	{
+//		Color[] guessDoesntMatchKey = {Color.BLUE, Color.BLUE, Color.BLUE, Color.BLUE};
+//		Guess g = new Guess(keyAllDiff, guessDoesntMatchKey);
+//		g.checkForReds();
+//		g.checkForWhites();
+//		assertArrayEquals(new int[] {0,0,0,0}, g.getResults());
+//	}
+//	
+//	@Test
+//	public void checkResultsMixtureOfRedsAndWhites()
+//	{
+//		Color[] guessMatchesKeyALittle = {Color.BLUE, Color.GREEN, Color.ORANGE, Color.BLUE};
+//		Guess g = new Guess(keyAllDiff, guessMatchesKeyALittle);
+//		g.checkForReds();
+//		g.checkForWhites();
+//		assertArrayEquals(new int[] {0,2,1,0}, g.getResults());
+//	}
+//	
+//	//NM
+//	@Test
+//	public void checkResultsMixtureOfRedsAndWhitesWithRepeats()
+//	{
+//		Color[] guessMatchesKeyALittle = {Color.WHITE, Color.GREEN, Color.RED, Color.RED};
+//		Guess g = new Guess(keyWithRepeats, guessMatchesKeyALittle);
+//		g.checkForReds();
+//		g.checkForWhites();
+//		assertArrayEquals(new int[] {2,0,2,1}, g.getResults());		
+//	}
 	
 	@Test
 	public void testGamesCheckGuessMethod()

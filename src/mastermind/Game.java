@@ -7,9 +7,6 @@ public class Game
 
 	private Key key;// holds the sequence the player must guess
 	private Guess[] guesses;// holds guess objects--the guesses of the user for reference
-	private int[][] results;/*holds the status of each peg--red, white, or none
-							this is NOT for player use but rather for the programmers'/computer's use for future advancements
-							such as tracking logical consistency*/
 	private int guessTracker;/*this keeps track of what position we are at in the guesses array and what
 								row we are in in the results array*/
 	private boolean gameWon;// becomes true if user wins
@@ -42,7 +39,6 @@ public class Game
 		numColors = colorLevel.getNumColors();
 		guessTracker = 0;
 		guesses = new Guess[guessLevel.getNumGuesses()];
-		results = new int[guessLevel.getNumGuesses()][KEY_SIZE];
 		gameWon = false;
 		
 		if(userKey==null)
@@ -72,13 +68,12 @@ public class Game
 		g.checkForReds();
 		g.checkForWhites();
 		guesses[guessTracker] = g; //store this guess in the guesses array
-		results[guessTracker] = g.getResults();
 		if (g.isAllRed())
 			gameWon = true;
 		guessTracker++;
 	}
 	
-	public boolean isGameWon()// Nechama added this
+	public boolean isGameWon()//Nechama added this
 	{
 		return gameWon;
 	}
@@ -96,28 +91,6 @@ public class Game
 		{
 			return null;
 		}
-	}
-
-	/**
-	 * Getter for results
-	 * @return Deep copy of results array
-	 */
-	/*
-	 * This method may present a security breach in the interests of providing access for one (as yet undeveloped) 
-	 * class to the results array. This will be reassessed later in the development process.
-	 */
-	//TODO: return to this method and reanalyze
-	public int[][] getResults()
-	{	
-		//TL added this method
-		int[][] array = new int[results.length][results[0].length];
-		//deep copy
-		for (int i = 0; i < results.length; i++)
-		{
-			for (int j = 0; j < results[i].length; j++)
-				array[i][j] = results[i][j];
-		}
-		return array;
 	}
 
 	public static int getKeySize()
