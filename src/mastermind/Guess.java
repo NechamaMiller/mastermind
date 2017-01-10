@@ -50,8 +50,6 @@ public class Guess
 	{
 		for (int index = 0; index < key.length; index++)
 		{
-			// if right color right place, the row of the turn up to in game and the column up to in loop
-			// gets a 1 to symbolize a red
 			if (sequence[index].equals(key[index]))
 			{
 				numReds++;// total red pegs updated
@@ -71,10 +69,8 @@ public class Guess
 				//loops once per each possible position in the attempt
 				for (int sequenceIndex = 0; sequenceIndex < sequence.length; sequenceIndex++)
 				{
-					//as long as not same place (the current peg we're looking at and the
-					//position we're comparing it to- because then would be red), and this peg
-					//in the attempt hasn't been found yet
-					//if (&& sequence[sequenceIndex].equals(key[keyIndex]))
+					//as long as not same place (the current peg we're looking at and the position we're comparing it to- because then would be red), 
+					//and this peg in the attempt hasn't been found yet
 					if (sequenceIndex != keyIndex && sequence[sequenceIndex].equals(key[keyIndex]) && !foundInKey[keyIndex] && !foundInSequence[sequenceIndex])
 					{
 						numWhites++;

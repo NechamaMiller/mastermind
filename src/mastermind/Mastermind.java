@@ -88,7 +88,7 @@ public class Mastermind
 		System.out.println();
 	
 		System.out.println("You will have " + game.getTotalNumTurns()
-				+ " turns to guess the code picking from  the following colors" + displayColors());
+				+ " turns to guess the code picking from  the following colors: " + displayColors());
 	
 		do
 		{
