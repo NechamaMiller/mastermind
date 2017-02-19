@@ -2,12 +2,8 @@ package mastermind;
 
 import enums.Color;
 
-public class ComputerGuess
+public class ComputerGuess extends Guess
 {
-	private Color[] sequence;
-	private int numReds;
-	private int numWhites;
-	
 	public ComputerGuess(Color[] sequence)
 	{
 		if(sequence == null)
@@ -27,9 +23,9 @@ public class ComputerGuess
 
 	public void setNumReds(int numReds)
 	{
-		if(numReds<0 || numReds+numWhites>Game.getKeySize())
+		if(numReds<0 || numReds+numWhites>Mastermind.getKeySize())
 		{
-			throw new IllegalArgumentException("numReds must be greater than 0 and numReds + numwhites can't be more than " + Game.getKeySize());
+			throw new IllegalArgumentException("numReds must be greater than 0 and numReds + numwhites can't be more than " + Mastermind.getKeySize());
 		}
 		
 		this.numReds = numReds;
@@ -37,35 +33,13 @@ public class ComputerGuess
 
 	public void setNumWhites(int numWhites)
 	{
-		if(numWhites<0 || numWhites+numReds>Game.getKeySize())
+		if(numWhites<0 || numWhites+numReds>Mastermind.getKeySize())
 		{
-			throw new IllegalArgumentException("numWhites must be greater than 0 and numReds + numwhites can't be more than " + Game.getKeySize());
+			throw new IllegalArgumentException("numWhites must be greater than 0 and numReds + numwhites can't be more than " + Mastermind.getKeySize());
 		}
 		
 		this.numWhites = numWhites;
-	}
-
-	public int getNumReds()
-	{
-		return numReds;
-	}
-
-	public int getNumWhites()
-	{
-		return numWhites;
-	}
-
-	public Color[] getSequence()
-	{
-		Color[] temp = new Color[sequence.length];
-		
-		for(int i=0; i<temp.length; i++)
-		{
-			temp[i] = sequence[i];
-		}
-		
-		return temp;		
-	}
+	}		
 	
 	public boolean isAllOneColor()
 	{
@@ -80,51 +54,5 @@ public class ComputerGuess
 		}
 		
 		return true;
-	}
-	
-	@Override
-	public String toString()
-	{
-		StringBuilder sb = new StringBuilder();
-		
-		sb.append("sequence: ");
-		
-		for(Color color: sequence)
-		{
-			sb.append(color + " ");
-		}
-		
-		return sb.toString();
-	}
-	
-	@Override
-	public boolean equals(Object obj)
-	{
-		if(obj == this)
-		{
-			return true;
-		}
-		
-		if(obj == null)
-		{
-			return false;
-		}
-		
-		if(! (obj instanceof ComputerGuess))
-		{
-			return false;
-		}
-		
-		ComputerGuess guess2 = (ComputerGuess)obj;
-		
-		for(int i=0; i<sequence.length; i++)
-		{
-			if(guess2.sequence[i] != sequence[i])
-			{
-				return false;
-			}
-		}
-		
-		return true;
-	}
+	}	
 }

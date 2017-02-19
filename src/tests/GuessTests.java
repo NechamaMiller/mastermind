@@ -15,7 +15,7 @@ public class GuessTests {
 	public void testCheckGuessAllPegsSameColor()
 	{
 		Color[] guessAllSame = {Color.RED, Color.RED, Color.RED, Color.RED};
-		Guess g = new Guess(keyAllDiff, guessAllSame);
+		HumanGuess g = new HumanGuess(keyAllDiff, guessAllSame);
 		g.checkForReds();
 		g.checkForWhites();
 		assertEquals(0, g.getNumReds());
@@ -26,7 +26,7 @@ public class GuessTests {
 	public void testCheckGuessAllPegsDiffColor()
 	{
 		Color[] guessAllDiff = {Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN};
-		Guess g = new Guess(keyAllDiff, guessAllDiff);
+		HumanGuess g = new HumanGuess(keyAllDiff, guessAllDiff);
 		g.checkForReds();
 		g.checkForWhites();
 		assertEquals(0, g.getNumReds());
@@ -37,7 +37,7 @@ public class GuessTests {
 	public void testCheckGuessRepeatingPegColors()
 	{
 		Color[] guessWithRepeats = {Color.RED, Color.BLUE, Color.RED, Color.BLUE};
-		Guess g = new Guess(keyWithRepeats, guessWithRepeats);
+		HumanGuess g = new HumanGuess(keyWithRepeats, guessWithRepeats);
 		g.checkForReds();
 		g.checkForWhites();
 		assertEquals(1, g.getNumReds()); //1st RED is in right place
@@ -48,7 +48,7 @@ public class GuessTests {
 	public void testCheckGuessReturnsFourRedsGameWon()
 	{
 		Color[] guessMatchesKey = {Color.RED, Color.WHITE, Color.BLUE, Color.RED};
-		Guess g = new Guess(keyWithRepeats, guessMatchesKey);
+		HumanGuess g = new HumanGuess(keyWithRepeats, guessMatchesKey);
 		g.checkForReds();
 		g.checkForWhites();
 		assertEquals(4, g.getNumReds());
@@ -110,9 +110,9 @@ public class GuessTests {
 	@Test
 	public void testGamesCheckGuessMethod()
 	{
-		Game game = new Game();
+		HumanPlayer humanPlayer = new HumanPlayer();
 		Color[] guessWithRepeats = {Color.RED, Color.BLUE, Color.RED, Color.BLUE};
-		game.checkGuess(guessWithRepeats);
+		humanPlayer.checkGuess(guessWithRepeats);
 		//can't really check it because it doesn't return anything
 	}
 	
@@ -120,29 +120,29 @@ public class GuessTests {
 	public void testGetSequenceReturnsSequenceIPassedIt()
 	{
 		Color[] sequence = new Color[] {Color.RED, Color.BLUE, Color.RED, Color.BLUE};
-		Guess guess = new Guess(keyWithRepeats, sequence);
-		assertArrayEquals(sequence, guess.getSequence());
+		HumanGuess humanGuess = new HumanGuess(keyWithRepeats, sequence);
+		assertArrayEquals(sequence, humanGuess.getSequence());
 	}
 	
 	@Test (expected = InvalidDataException.class)
 	public void testConstructorThrowsExceptionWhenKeyIsNull()
 	{
 		Color[] attempt = {Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW};
-		Guess guess = new Guess(null, attempt);
+		HumanGuess humanGuess = new HumanGuess(null, attempt);
 	}
 	
 	@Test (expected = InvalidDataException.class)
 	public void testConstructorThrowsExceptionWhenAttemptIsNull()
 	{
-		Guess guess = new Guess(keyAllDiff, null);
+		HumanGuess humanGuess = new HumanGuess(keyAllDiff, null);
 	}
 	
 	@Test
 	public void getSequenceReturnsArrayCorrectly()
 	{
 		Color[] attempt = {Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW};
-		Guess guess = new Guess(keyAllDiff, attempt);
-		assertArrayEquals(attempt, guess.getSequence());
+		HumanGuess humanGuess = new HumanGuess(keyAllDiff, attempt);
+		assertArrayEquals(attempt, humanGuess.getSequence());
 	}
 	
 	//This makes sure that the toString() works
@@ -150,7 +150,7 @@ public class GuessTests {
 	{
 		Color[] attempt = {Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW};
 		Color[] key = new Color[10];
-		Guess guess = new Guess(key, attempt);
-		System.out.println(guess);
+		HumanGuess humanGuess = new HumanGuess(key, attempt);
+		System.out.println(humanGuess);
 	}
 }

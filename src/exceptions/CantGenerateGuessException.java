@@ -4,13 +4,11 @@ public class CantGenerateGuessException extends RuntimeException
 {
 	public CantGenerateGuessException()
 	{
-		super("no guess to generate");
+		super("Can't generate guess");
 	}
 	
 	public CantGenerateGuessException(String message)
 	{
 		super(message);
 	}
-	
-	
 }

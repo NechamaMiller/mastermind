@@ -23,7 +23,7 @@ public class ComputerPlayer
 		guesses = new ComputerGuess[guessLevel.getNumGuesses()];
 		guessTracker = 0;
 		allColors = new ArrayList<>();
-		colorsInRightSpots = new Color[Game.getKeySize()];
+		colorsInRightSpots = new Color[Mastermind.getKeySize()];
 		numColorUpTo = 0;
 		colorsForSureInPattern = new ArrayList<>();
 
@@ -39,16 +39,32 @@ public class ComputerPlayer
 	 * Algorithm: start with one color in all 4 places, see if there are any reds (right color in the right spot)
 	 * As long as there are 0 reds, try another color.
 	 * If there are any reds, then keep the right amount of that color in the code, and use another color for the rest of the code
-	 * Now use guess and check (basically) to figure out the right spots for those colors
+	 * Now use guess and check to figure out the right spots for those colors
+	 */
+	/**
+	 * generates the next guess to try
+	 * @return the guess generated - WARNING: will return null if couldn't generate a guess (i.e. if there was faulty input)
+	 * @throws IllegalStateException - if the method is called when the computer already won the game or ran out of turns
 	 */
 	public Color[] generateGuess()
-	{
-		Color[] attempt = new Color[Game.getKeySize()];
-
+	{	
+		if (guessTracker == guesses.length)
+		{
+			throw new IllegalStateException("The computer ran out of turns.");
+		}
+		
 		ComputerGuess lastGuess = guessTracker == 0 ? null : guesses[guessTracker - 1];
 
+		 if (guessTracker != 0 && lastGuess.getNumReds() == Mastermind.getKeySize())
+		{
+			throw new IllegalStateException("Computer already won the game.");
+		}
+		 
+		 Color[] attempt = new Color[Mastermind.getKeySize()];
+
 		/*
-		 * if we didn't yet guess any of the right color then take another color from the arraylist to try 
+		 * if we didn't yet guess any of the right colors 
+		 * then take another color from the arraylist to try 
 		 */
 		if (guessTracker == 0 || colorsForSureInPattern.size() == 0)
 		{
@@ -58,14 +74,9 @@ public class ComputerPlayer
 				attempt[i] = color;
 			}
 		}
-		else if (lastGuess.getNumReds() == Game.getKeySize())
-		{
-			throw new IllegalStateException("Computer already won the game.");
-		}
-
 		else
 		{
-			attempt = getSequenceToTry(lastGuess);
+			attempt = getSequenceToTry();
 		}
 
 		ComputerGuess guess = new ComputerGuess(attempt);
@@ -77,7 +88,7 @@ public class ComputerPlayer
 	/**
 	 * This method should only be called when we know at least one right color
 	 */
-	private Color[] getSequenceToTry(ComputerGuess lastGuess)
+	private Color[] getSequenceToTry()
 	{
 		Color[] attempt = null;
 
@@ -97,10 +108,10 @@ public class ComputerPlayer
 				{
 					Color color = colorsToStillUse.remove(0);
 
-					int index = generator.nextInt(Game.getKeySize());
+					int index = generator.nextInt(Mastermind.getKeySize());
 					while (attempt[index] != null)
 					{
-						index = generator.nextInt(Game.getKeySize());
+						index = generator.nextInt(Mastermind.getKeySize());
 					}
 
 					attempt[index] = color;
@@ -110,7 +121,7 @@ public class ComputerPlayer
 
 			if (numTries > MAX_TRIES_PER_TURN)
 			{
-				throw new CantGenerateGuessException();
+				throw new CantGenerateGuessException("Can't generate guess, make sure your answers were correct");
 			}
 
 			if (colorsForSureInPattern.size() < attempt.length)
@@ -118,7 +129,7 @@ public class ComputerPlayer
 				// then we will need to add another color
 				if (numColorUpTo == allColors.size())
 				{
-					throw new CantGenerateGuessException();
+					throw new CantGenerateGuessException("Ran out of colors to try, can't generate guess");
 				}
 
 				Color color = allColors.get(numColorUpTo++);
@@ -137,7 +148,7 @@ public class ComputerPlayer
 
 	private Color[] addSpotsKnownForSure(ArrayList<Color> colorsToStillUse)
 	{
-		Color[] attempt = new Color[Game.getKeySize()];
+		Color[] attempt = new Color[Mastermind.getKeySize()];
 
 		for (int i = 0; i < colorsInRightSpots.length; i++)
 		{
@@ -227,9 +238,9 @@ public class ComputerPlayer
 
 	private void setNumRedsOfLastTurn(int numReds)
 	{
-		if (numReds < 0 || numReds > Game.getKeySize())
+		if (numReds < 0 || numReds > Mastermind.getKeySize())
 		{
-			throw new IllegalArgumentException("numReds must be between 0 and " + Game.getKeySize());
+			throw new IllegalArgumentException("numReds must be between 0 and " + Mastermind.getKeySize());
 		}
 
 		guesses[guessTracker - 1].setNumReds(numReds);
@@ -237,9 +248,9 @@ public class ComputerPlayer
 
 	private void setNumWhitesOfLastTurn(int numWhites)
 	{
-		if (numWhites < 0 || numWhites > Game.getKeySize())
+		if (numWhites < 0 || numWhites > Mastermind.getKeySize())
 		{
-			throw new IllegalArgumentException("numWhites must be between 0 and " + Game.getKeySize());
+			throw new IllegalArgumentException("numWhites must be between 0 and " + Mastermind.getKeySize());
 		}
 
 		guesses[guessTracker - 1].setNumWhites(numWhites);
@@ -249,7 +260,7 @@ public class ComputerPlayer
 	{
 		Color[] lastSequence = guesses[guessTracker - 1].getSequence();
 
-		if (numReds == Game.getKeySize())
+		if (numReds == Mastermind.getKeySize())
 		{
 			colorsInRightSpots = lastSequence;
 		}
@@ -287,7 +298,7 @@ public class ComputerPlayer
 
 	public boolean isGameWon()
 	{
-		return guessTracker != 0 && guesses[guessTracker - 1].getNumReds() == Game.getKeySize();
+		return guessTracker != 0 && guesses[guessTracker - 1].getNumReds() == Mastermind.getKeySize();
 	}
 
 	public boolean isGameOver()

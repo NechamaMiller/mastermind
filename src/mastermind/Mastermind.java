@@ -8,11 +8,11 @@ import exceptions.*;
 
 public class Mastermind
 {
-	private static Game game;
 	private static Scanner input = new Scanner(System.in);
 	private static GuessLevel guessLevel;
 	private static ColorLevel colorLevel;
 	private static JFrame frame;
+	private final static int KEY_SIZE = 4;
 
 	public static void main(String[] args)
 	{
@@ -47,10 +47,10 @@ public class Mastermind
 				+ "Before we start, I will let you pick what level you want to be on as far as the number of turns you can have and the number of color choices in the code.\n"
 				+ "Then, I will generate a secret code. Or, you can have a friend enter the code. Your job is to break that code!\n"
 				+ "The number of colors to choose from will depend on your level, but the total colors are "
-				+ displayColors() + ".\n" + "My code can be any combination of " + Game.getKeySize()
+				+ displayColors() + ".\n" + "My code can be any combination of " + KEY_SIZE
 				+ " of these colors - repeats are allowed.\n"
 				+ "The number of turns you will have will also depend on your level.\n"
-				+ "On each turn, you will enter " + Game.getKeySize()
+				+ "On each turn, you will enter " + KEY_SIZE
 				+ " colors, and I will tell you how many whites you scored on this round, and how many reds.\n"
 				+ "A \"white\" means you got the right color, but in the wrong place and a \"red\" means you got a color in the right place.\n"
 				+ "If you guess my code before you run out of turns, you win!\n"
@@ -83,36 +83,36 @@ public class Mastermind
 			userKey = null;
 		}
 	
-		game = new Game(guessLevel, colorLevel, userKey);
+		HumanPlayer humanPlayer = new HumanPlayer(guessLevel, colorLevel, userKey);
 	
 		System.out.println();
 	
-		System.out.println("You will have " + game.getTotalNumTurns()
+		System.out.println("You will have " + humanPlayer.getTotalNumTurns()
 				+ " turns to guess the code picking from  the following colors: " + displayColors());
 	
 		do
 		{
-			game.checkGuess(getGuess());
+			humanPlayer.checkGuess(getGuess());
 	
-			if (game.isGameWon())
+			if (humanPlayer.isGameWon())
 			{
 				System.out
-						.println("You guessed the code! It was " + printColorSequence(game.getKey()) + ". You win!!!");
+						.println("You guessed the code! It was " + printColorSequence(humanPlayer.getKey()) + ". You win!!!");
 			}
 			else
 			{
 				System.out.println("\nHere are your guesses so far:");
-				for (int i = 0; i < game.getNumGuessesMade(); i++)
+				for (int i = 0; i < humanPlayer.getNumGuessesMade(); i++)
 				{
-					System.out.println("\nGuess number " + (i + 1) + ":\n" + game.getGuesses()[i]);
+					System.out.println("\nGuess number " + (i + 1) + ":\n" + humanPlayer.getGuesses()[i]);
 				}
 			}
 		}
-		while (game.getNumGuessesMade() < game.getTotalNumTurns() && !game.isGameWon());
+		while (humanPlayer.getNumGuessesMade() < humanPlayer.getTotalNumTurns() && !humanPlayer.isGameWon());
 	
-		if (!(game.isGameWon()))
+		if (!(humanPlayer.isGameWon()))
 		{
-			System.out.println("Game over! You lose! The code was " + printColorSequence(game.getKey())
+			System.out.println("Game over! You lose! The code was " + printColorSequence(humanPlayer.getKey())
 					+ ". Better luck next time...");
 		}
 	
@@ -139,28 +139,19 @@ public class Mastermind
 		while (!player.isGameOver())
 		{
 			Color[] attempt = null;
-	
 			try
 			{
 				attempt = player.generateGuess();
 			}
-			catch (CantGenerateGuessException e)
+			catch (CantGenerateGuessException e)//if computer couldn't guess code
 			{
 				input.nextLine();
-				System.out.println("I can't seem to guess your code, are you sure you entered all your reds and whites corrrectly?");
-				System.out.print("Enter 'y' if you realize you entered something wrong, or 'n' otherwise:");
-				
-				String yn = input.nextLine().toLowerCase();
-				char enterKey = yn.charAt(0);
-				while (enterKey != 'y' && enterKey != 'n')
-				{
-					System.out.println("Invalid entry. Please enter \"y\" or \"n\"");
-					yn = input.nextLine().toLowerCase();
-					enterKey = yn.charAt(0);
-				}
+				boolean wasIncorrect = getBoolInput("I can't seem to guess your code, are you sure you entered all your reds and whites corrrectly?"
+						+ "\nIf you entered something incorrectly, please enter \"y\"\n");				
 				
 				System.out.println();
-				if(enterKey == 'n')
+				
+				if(!wasIncorrect)
 				{
 					System.out.println("Well in that case, you win! Great game!");
 					System.exit(0);
@@ -190,7 +181,7 @@ public class Mastermind
 			int numWhites = input.nextInt();
 			player.setLastTurnResults(numReds, numWhites);
 	
-			while (numReds + numWhites > Game.getKeySize() || numReds < 0 || numWhites < 0)
+			while (numReds + numWhites > KEY_SIZE || numReds < 0 || numWhites < 0)
 			{
 				System.out.println("Oops! You entered something invalid. Please try again:");
 	
@@ -214,7 +205,7 @@ public class Mastermind
 		}
 	}
 
-	public static String displayColors()
+	private static String displayColors()
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -238,10 +229,10 @@ public class Mastermind
 	}
 
 	// edited by NM
-	public static Color[] getGuess()
+	private static Color[] getGuess()
 	{
 		System.out.println("\nEnter the next sequence you would like to guess, separated by spaces."
-				+ "\nYou can choose any " + Game.getKeySize() + " of the following colors: " + displayColors());
+				+ "\nYou can choose any " + KEY_SIZE + " of the following colors: " + displayColors());
 
 		String key = input.nextLine().trim();
 
@@ -251,7 +242,7 @@ public class Mastermind
 	/**
 	 * Colors passed in must be ready to be sent to the Color enum (i.e. already capitalized)
 	 */
-	public static boolean isValidColor(String input)
+	private static boolean isValidColor(String input)
 	{
 		if (input == null)
 		{
@@ -270,7 +261,7 @@ public class Mastermind
 		return false;
 	}
 
-	public static String printColorSequence(Color[] sequence)
+	private static String printColorSequence(Color[] sequence)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -282,7 +273,7 @@ public class Mastermind
 		return sb.toString().trim();
 	}
 
-	public static GuessLevel getGuessLevel()
+	private static GuessLevel getGuessLevel()
 	{
 		System.out.println("What guess level do you want to play on?");
 
@@ -305,7 +296,7 @@ public class Mastermind
 		return GuessLevel.values()[choice - 1];
 	}
 
-	public static ColorLevel getColorLevel()
+	private static ColorLevel getColorLevel()
 	{
 		System.out.println("What color-choice level do you want to play on?");
 
@@ -328,50 +319,21 @@ public class Mastermind
 		return ColorLevel.values()[choice - 1];
 	}
 
-	public static boolean playerWillGuessCode()
+	private static boolean playerWillGuessCode()
 	{
-		System.out.println("Do you want to guess the code, or should the computer try to guess your code?\n"
-				+ "Enter \"y\" for yes, I want to guess the code or \"n\" for no, I want the computer to guess my code");
-		String yn = input.nextLine().toLowerCase();
-		char enterKey = yn.charAt(0);
-		while (enterKey != 'y' && enterKey != 'n')
-		{
-			System.out.println("Invalid entry. Please enter \"y\" or \"n\"");
-			yn = input.nextLine().toLowerCase();
-			enterKey = yn.charAt(0);
-		}
-
-		return enterKey == 'y';
+		return getBoolInput("Do you want to guess the code(y), or should the computer try to guess your code(n)?\n");
 	}
 
 	public static boolean multiplayer()
 	{
-		System.out.println("Do you want a friend to enter the key to guess instead of the computer?"
-				+ " Enter \"y\" for yes or \"n\" for no");
-		String yn = input.nextLine().toLowerCase();
-		char enterKey = yn.charAt(0);
-		while (enterKey != 'y' && enterKey != 'n')
-		{
-			System.out.println("Invalid entry. Please enter \"y\" or \"n\"");
-			yn = input.nextLine().toLowerCase();
-			enterKey = yn.charAt(0);
-		}
-		if (enterKey == 'y')
-		{
-			return true;
-		}
-		else
-			return false;
-
+		return getBoolInput("Do you want a friend to enter the key to guess instead of the computer?\n");
 	}
 
-	// KR but basically copied the getGuess method
-	// NM made it be able to use dialog box
 	public static Key enterKey(boolean useDialogBox)
 	{
 		String key;
 
-		String message = "Enter the secret code, separated by spaces." + "\nYou can choose any " + Game.getKeySize()
+		String message = "Enter the secret code, separated by spaces." + "\nYou can choose any " + KEY_SIZE
 				+ " of the following colors: " + displayColors();
 
 		if (useDialogBox)
@@ -393,7 +355,7 @@ public class Mastermind
 
 	private static Color[] getColorSequenceFromString(String entry, boolean useDialogBox)
 	{
-		Color[] colors = new Color[Game.getKeySize()];
+		Color[] colors = new Color[KEY_SIZE];
 
 		// get rid of extra spaces so can split on a string
 		entry = getRidOfExtraSpacesInString(entry);
@@ -476,8 +438,12 @@ public class Mastermind
 
 	private static boolean giveReminder()
 	{
-		System.out.println("Do you want to be reminded what your code was before every turn?\n"
-				+ "Enter \"y\" for yes or \"n\" for no");
+		return getBoolInput("Do you want to be reminded what your code was before every turn?\n");
+	}	
+	
+	private static boolean getBoolInput(String message)
+	{
+		System.out.println(message + "Enter \"y\" for yes or \"n\" for no");
 
 		String yn = input.nextLine().toLowerCase();
 		char enterKey = yn.charAt(0);
@@ -489,5 +455,10 @@ public class Mastermind
 		}
 
 		return enterKey == 'y';
+	}
+	
+	public static int getKeySize()
+	{
+		return KEY_SIZE;
 	}
 }
